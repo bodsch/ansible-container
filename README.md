@@ -10,32 +10,31 @@ ansible role for docker deployment of generic container applications
 [releases]: https://github.com/bodsch/ansible-container/releases
 
 
-Als Registry kann eine private Registry eingesetzt werden.
-
 ## usage
 
-### Konfiguration der Registry
+### container registry
+
+A private registry can be used as the registry.
 
 ```
 container_registry:
   host: ''
   username: ''
   password: ''
-
 ```
 
-### Konfiguration der Container
+### container configuration
+
 
 ```
 container:
-  - name: workflow-server
-    image: "{{ container_registry.aws_ecr }}/workflow-server:{{ coremedia_version }}"
+  - name: workflow
+    image: "{{ container_registry }}/workflow:{{ container_tag }}"
     pull: true
     state: started
     restart_policy: always
     dns_servers:
       - "{{ ansible_default_ipv4.address }}"
-
       networks_cli_compatible: true
       networks:
         - name: coremedia
@@ -54,16 +53,18 @@ container:
         HEAP_DUMP_FILENAME: workflow-server-heapdump
 ```
 
-Alle `environments` Einträge werden auf dem Zielsystem in eine seperate environments Datei persistiert.
+All `environments` entries are persisted to a separate environments file on the target system.
 
-Z.B. unter `/etc/ccontainer/${CONTAINER_NAME}/environment.env`
+E.g. under `/etc/ccontainer/${CONTAINER_NAME}/environment.env`
+
+The target directory for persistence can be customized via `container_env_directory`.
 
 
 ## tests
 
-Lokale Tests werden in einem docker container ausgeführt.
+Local tests are executed in a docker container.
 
-Hier ist zu beachten, dass dieser einen eigenen docker-daemon zur Verfügung stellen muss (*docker-in-docker*).
+Note that this container must provide its own docker daemon (*docker-in-docker*).
 
 ```
 $ tox -e py39-ansible29 -- molecule converge -s default
@@ -71,8 +72,8 @@ $ tox -e py39-ansible29 -- molecule converge -s default
 
 ## filter_plugins
 
-Information eines `docker pull`s über das `docker_container` Modul wird durch ein Filter Plugin
-bereinigt und gibt anschließend nur noch relevante Informationen zurück.
+Information of a `docker pull`s via the `docker_container` module is cleaned by a filter plugin
+and returns only relevant information.
 
 - container
 - created

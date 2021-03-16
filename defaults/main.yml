@@ -1,0 +1,17 @@
+---
+
+container_env_directory: /opt/container
+
+container_registry:
+  host: ''
+  username: ''
+  password: ''
+
+container: {}
+
+container_use_network: true
+container_network: []
+#   - name: docker_network
+#     subnet: 172.3.27.0/24
+#     gateway: 172.3.27.2
+#     iprange: 172.3.27.0/26

@@ -1,0 +1,55 @@
+---
+
+- name: install dedendency
+  package:
+    name: "{{ container_packages }}"
+    state: present
+
+- name: merge container registry configuration between defaults and custom
+  set_fact:
+    container_registry: "{{ container_registry_default |
+      combine( container_registry, recursive=True ) }}"
+
+- name: get container_names from container
+  set_fact:
+    container_names: "{{ container | container_names }}"
+
+- name: get container_images from container
+  set_fact:
+    container_images: "{{ container | container_images }}"
+
+- name: create base directory to persist docker environnments
+  file:
+    name: "{{ container_env_directory }}"
+    state: directory
+    mode: 0755
+  no_log: true
+
+- name: create application directory to persist docker environnments
+  file:
+    name: "{{ container_env_directory }}/{{ item }}"
+    state: directory
+    owner: '1000'
+    group: '1000'
+    mode: 0775
+  with_items: "{{ container_names }}"
+
+- name: persist application docker environnments
+  template:
+    src: container.env.j2
+    dest: "{{ container_env_directory }}/{{ item.name }}/container.env"
+    mode: 0755
+  no_log: true
+  with_items: "{{ container }}"
+
+- name: remove environnments from container
+  set_fact:
+    container: "{{ container | remove_environments }}"
+
+- name: make sure ansible local facts directory exists
+  file:
+    dest: /etc/ansible/facts.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
