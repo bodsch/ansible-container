@@ -1,0 +1,14 @@
+---
+
+# container_registry:
+#   host: "harbor.cm.local"
+#   username: ''
+#   password: ''
+
+
+container:
+  - name: nginx
+    hostname: nginx
+    image: nginx:1.15-alpine
+    published_ports:
+      - 80:80

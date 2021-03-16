@@ -1,0 +1,36 @@
+---
+
+galaxy_info:
+  role_name: container
+  namespace: bodsch
+  author: Bodo Schulz
+  description: A simple and generic role for deploying container
+  license: Apache
+  min_ansible_version: 2.9
+  platforms:
+    - name: Ubuntu
+      versions:
+        # 16.04
+        - cosmic
+        # 18.04
+        - bionic
+        # 20.04
+        - focal
+    - name: Debian
+      versions:
+        # 9
+        - etch
+        # 10
+        - buster
+    - name: EL
+      versions:
+        - 7
+        - 8
+    - name: ArchLinux
+
+  galaxy_tags:
+    - container
+    - docker
+    - deployment
+
+dependencies: []

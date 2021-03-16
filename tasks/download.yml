@@ -1,0 +1,76 @@
+---
+
+- name: "pull container from container registry {{ container_registry.host }}"
+  become: true
+  docker_image:
+    name: "{{ item }}"
+    source: pull
+    force_tag: true
+    force_source: true
+  register: _container_image_pull_information
+  # no_log: true
+  ignore_errors: false
+  with_items: "{{ container_images }}"
+
+- name: update needed | true  # noqa no-handler
+  set_fact:
+    container_update_needed: true
+    container_changed: "{{ _container_image_pull_information | changed }}"
+    container: "{{ container | update(container_changed) }}"
+  when:
+    - _container_image_pull_information.changed
+
+- name: all images are up to date ...
+  debug:
+    msg:
+      - all images are up to date ...
+  when: not container_update_needed
+
+- name: update needed ...
+  debug:
+    msg:
+      - update needed ...
+      - "changed image(s) {{ container_changed }}"
+  when:
+    - container_update_needed
+
+- name: update container for recreate running docker instance
+  set_fact:
+    container: "{{ container | update(container_changed) }}"
+  when:
+    - container_update_needed
+
+# READ local_facts
+# read a present salt from ansible facts
+#
+- name: set local fact for container
+  set_fact:
+    local_container: "{{ ansible_local.update_container.update_needed }}"
+  when:
+    - ansible_local.update_container is defined
+    - ansible_local.update_container.update_needed is defined
+    - ansible_local.update_container.update_needed | length != 0
+
+- name: save changed containers
+  block:
+    - name: create custom fact file
+      template:
+        src: facts.d/update_container.fact.j2
+        dest: /etc/ansible/facts.d/update_container.fact
+        owner: root
+        group: root
+        mode: 0755
+      when: container_update_needed
+
+    - name: do facts module to get latest information
+      setup:
+  when:
+    - container_update_needed
+    - container | length != 0
+
+- name: redefine container from local fact
+  set_fact:
+    container: "{{ local_container }}"
+  when:
+    - local_container is defined
+    - local_container | length != 0

@@ -1,0 +1,12 @@
+---
+
+- name: create docker network
+  docker_network:
+    name: "{{ item.name }}"
+    enable_ipv6: false
+    ipam_config:
+      - subnet: "{{ item.subnet }}"
+        gateway: "{{ item.gateway }}"
+        iprange: "{{ item.iprange }}"
+  with_items: "{{ container_network }}"
+  when: container_use_network
