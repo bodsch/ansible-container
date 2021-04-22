@@ -44,6 +44,8 @@
     env_file: "{{ container_env_directory }}/{{ item.name }}/container.env"
   with_items: "{{ container }}"
   register: create_container_instances
+  loop_control:
+    label: "{{ item.name }} - hostname: {{ item.name }} - image: {{ item.image }}"
 
 - name: remove update fact
   file:
