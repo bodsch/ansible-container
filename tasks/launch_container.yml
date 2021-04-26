@@ -42,8 +42,11 @@
     healthcheck: "{{ item.healthcheck | default(omit) }}"
     labels: "{{ item.labels | default(omit) }}"
     env_file: "{{ container_env_directory }}/{{ item.name }}/container.env"
-  with_items: "{{ container }}"
+  loop:
+    "{{ container }}"
   register: create_container_instances
+  loop_control:
+    label: "name {{ item.name }} with image {{ item.image }}"
 
 - name: remove update fact
   file:

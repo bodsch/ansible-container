@@ -10,7 +10,8 @@
   register: _container_image_pull_information
   # no_log: true
   ignore_errors: false
-  with_items: "{{ container_images }}"
+  loop:
+    "{{ container_images }}"
 
 - name: update needed | true  # noqa no-handler
   set_fact:
