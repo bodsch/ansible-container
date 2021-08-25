@@ -1,6 +1,6 @@
 ---
 
-- name: "pull container from container registry {{ container_registry.host }}"
+- name: "pull container from container registry {{ container_registry.host | default('') }}"
   become: true
   docker_image:
     name: "{{ item }}"
@@ -12,6 +12,8 @@
   ignore_errors: false
   loop:
     "{{ container_images }}"
+  loop_control:
+    label: "{{ item }}"
 
 - name: update needed | true  # noqa no-handler
   set_fact:

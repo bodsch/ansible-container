@@ -31,7 +31,6 @@
     name: "{{ container_env_directory }}"
     state: directory
     mode: 0755
-  # no_log: true
 
 - name: create application directory to persist docker environnments
   file:
@@ -48,29 +47,23 @@
     src: container.env.j2
     dest: "{{ container_env_directory }}/{{ item.name }}/container.env"
     mode: 0755
-  # no_log: true
+  no_log: true
   register: __changed_environments
   loop:
     "{{ container }}"
   loop_control:
     label: "{{ item.name }}"
 
-- name: persist application docker environnments
+- name: persist application docker facts
   template:
     src: facts.d/container.env.facts.j2
     dest: /etc/ansible/facts.d/{{ item.name }}.json
     mode: 0755
-  # no_log: true
+  no_log: true
   loop:
     "{{ container }}"
   loop_control:
     label: "{{ item.name }}"
-
-# - debug:
-#     var: "{{ item }}"
-#   when: item is defined
-#   loop:
-#     - "{{ __changed_environments }}"
 
 - name: remove environnments from container
   set_fact:
