@@ -5,10 +5,27 @@
 #   username: ''
 #   password: ''
 
+container: "{{ container_frontend | union(container_backend) }}"
 
-container:
+container_frontend:
   - name: nginx
     hostname: nginx
     image: nginx:1.15-alpine
     published_ports:
       - 80:80
+
+container_backend:
+  - name: redis
+    hostname: redis
+    image: redis:latest
+    environments:
+      SPRING_BOOT_EXPLODED_APP: "true"
+      JDBC_DRIVER: com.mysql.cj.jdbc.Driver
+      JDBC_URL: jdbc:mysql://frontend-mysql.cm.local:3306/caefeeder_live
+      JDBC_USER: caefeeder_live
+      SOLR_URL: http://solr:8983/solr
+      SOLR_COLLECTION_CAE: live
+      REPOSITORY_URL: http://master-live-server:8080/ior
+      HEAP_DUMP_FILENAME: cae-feeder-live-heapdump
+      JAVA_HEAP: 512m
+      JAVA_PARALLEL_GC: "false"

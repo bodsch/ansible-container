@@ -46,7 +46,7 @@
     "{{ container }}"
   register: create_container_instances
   loop_control:
-    label: "name {{ item.name }} with image {{ item.image }}"
+    label: "{{ item.name }} - hostname: {{ item.name }} - image: {{ item.image }}"
 
 - name: remove update fact
   file:
