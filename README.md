@@ -1,4 +1,7 @@
 
+# Ansible Role:  `container`
+
+
 ansible role for docker deployment of generic container applications
 
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/bodsch/ansible-container/CI)][ci]
@@ -16,7 +19,7 @@ ansible role for docker deployment of generic container applications
 
 A private registry can be used as the registry.
 
-```
+```yaml
 container_registry:
   host: ''
   username: ''
@@ -26,7 +29,7 @@ container_registry:
 ### container configuration
 
 
-```
+```yaml
 container:
   - name: workflow
     image: "{{ container_registry }}/workflow:{{ container_tag }}"
@@ -55,7 +58,7 @@ container:
 
 All `environments` entries are persisted to a separate environments file on the target system.
 
-E.g. under `/etc/ccontainer/${CONTAINER_NAME}/environment.env`
+E.g. under `/opt/container/${CONTAINER_NAME}/environment.env`
 
 The target directory for persistence can be customized via `container_env_directory`.
 
@@ -66,13 +69,13 @@ Local tests are executed in a docker container.
 
 Note that this container must provide its own docker daemon (*docker-in-docker*).
 
-```
-$ tox -e py39-ansible29 -- molecule converge -s default
+```bash
+tox -e py39-ansible29 -- molecule converge -s default
 ```
 
 ## filter_plugins
 
-Information of a `docker pull`s via the `docker_container` module is cleaned by a filter plugin
+Information of a `docker pull` via the `docker_container` module is cleaned by a filter plugin
 and returns only relevant information.
 
 - container
@@ -80,15 +83,15 @@ and returns only relevant information.
 - interne Id
 - image prüfsumme
 
-```
+```yaml
 "content-management-server": {
-    "container": "750859870390.dkr.ecr.eu-central-1.amazonaws.com/content-server:latest",
+    "container": "xxx.dkr.ecr.eu-central-1.amazonaws.com/content-server:latest",
     "created": "2020-09-10T07:01:24.482766886Z",
     "id": "baaa15ee39248ecf2552133ea84c8abe02b6323ee04c2792de73117fa2b8dffb",
     "image": "sha256:e791a446e2c1ed9e5f65c0edb1ca488466caecb648a77331701111f0d9b454b7"
 },
 "workflow-server": {
-    "container": "750859870390.dkr.ecr.eu-central-1.amazonaws.com/workflow-server:latest",
+    "container": "xxx.dkr.ecr.eu-central-1.amazonaws.com/workflow-server:latest",
     "created": "2020-09-10T07:01:19.379408285Z",
     "id": "b1028d8c0ee9c8090fb17031435b6ce6f93aafde22e973977a1ae2cc6ce2ea6c",
     "image": "sha256:4dc04a576c0237b506a8e2b3fb015019b43d314b1eee11dcde06fef5b09bbdf4"
