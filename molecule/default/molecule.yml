@@ -13,13 +13,19 @@ lint: |
 
 platforms:
   - name: "${INSTANCE:-instance}"
-    image: bodsch/molecule-dind:210309
+    image: "diodonfrost/ansible-${DISTRIBUTION:-debian:10}"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
     privileged: true
     pre_build_image: true
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /lib/modules:/lib/modules:ro
+      - /var/lib/docker/overlay2:/var/lib/docker/overlay2:rw
+    capabilities: ALL
+    published_ports:
+      - 8080:80
+      - 8443:443
 
 provisioner:
   name: ansible

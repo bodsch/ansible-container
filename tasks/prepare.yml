@@ -1,5 +1,13 @@
 ---
 
+- name: make sure ansible local facts directory exists
+  file:
+    dest: /etc/ansible/facts.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
 - name: install dedendency
   package:
     name: "{{ container_packages }}"
@@ -23,7 +31,6 @@
     name: "{{ container_env_directory }}"
     state: directory
     mode: 0755
-  no_log: true
 
 - name: create application directory to persist docker environnments
   file:
@@ -32,7 +39,8 @@
     owner: '1000'
     group: '1000'
     mode: 0775
-  with_items: "{{ container_names }}"
+  loop:
+    "{{ container_names }}"
 
 - name: persist application docker environnments
   template:
@@ -40,16 +48,23 @@
     dest: "{{ container_env_directory }}/{{ item.name }}/container.env"
     mode: 0755
   no_log: true
-  with_items: "{{ container }}"
+  register: __changed_environments
+  loop:
+    "{{ container }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: persist application docker facts
+  template:
+    src: facts.d/container.env.facts.j2
+    dest: /etc/ansible/facts.d/{{ item.name }}.json
+    mode: 0755
+  no_log: true
+  loop:
+    "{{ container }}"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: remove environnments from container
   set_fact:
     container: "{{ container | remove_environments }}"
-
-- name: make sure ansible local facts directory exists
-  file:
-    dest: /etc/ansible/facts.d
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
