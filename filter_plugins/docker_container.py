@@ -5,6 +5,7 @@ __metaclass__ = type
 from ansible.utils.display import Display
 
 import json
+import itertools
 
 # https://docs.ansible.com/ansible/latest/dev_guide/developing_plugins.html
 # https://blog.oddbit.com/post/2019-04-25-writing-ansible-filter-plugins/
@@ -21,6 +22,7 @@ class FilterModule(object):
             'compare_dict': self.filter_compare_dict,
             'container_names': self.filter_names,
             'container_images': self.filter_images,
+            'container_volumes': self.filter_volumes,
             'remove_environments': self.filter_remove_env,
             'changed': self.filter_changed,
             'update': self.filter_update,
@@ -207,6 +209,44 @@ class FilterModule(object):
                     d['recreate'] = "true"
 
         return data
+
+    def filter_volumes(self, data):
+        """
+          return volumes
+        """
+        result = []
+        volumes = self._get_keys_from_dict(data, 'volumes')
+        merged = list(itertools.chain(*volumes))
+
+        # filter volumes with this endings
+        volume_block_list_ends = (
+            '.pid',
+            '.sock',
+            '.socket',
+        )
+        volume_block_list_starts = (
+            '/sys',
+            '/dev',
+        )
+
+        for v in merged:
+            _local_volume = v.split(':')[0]
+            #
+            if not (
+                _local_volume.endswith(volume_block_list_ends) or _local_volume.startswith(volume_block_list_starts)
+            ):
+                result.append(_local_volume)
+
+        # deduplicate entries
+        result = list(set(result))
+        result = sorted(result)
+
+        display.v("return : {}".format(result))
+
+        return result
+
+    def _flatten(t):
+        return [item for sublist in t for item in sublist]
 
     def diff_dicts(self, a, b, missing=KeyError):
         """

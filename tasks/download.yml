@@ -1,7 +1,8 @@
 ---
 
-- name: "pull container from container registry {{ container_registry.host | default('') }}"
-  become: true
+- name: "pull container from container registry {{ container_registry.host }}"
+  # become: true
+  # become_user: admin
   docker_image:
     name: "{{ item }}"
     source: pull
@@ -10,10 +11,7 @@
   register: _container_image_pull_information
   # no_log: true
   ignore_errors: false
-  loop:
-    "{{ container_images }}"
-  loop_control:
-    label: "{{ item }}"
+  with_items: "{{ container_images }}"
 
 - name: update needed | true  # noqa no-handler
   set_fact:
@@ -62,7 +60,7 @@
         dest: /etc/ansible/facts.d/update_container.fact
         owner: root
         group: root
-        mode: 0755
+        mode: 0o644
       when: container_update_needed
 
     - name: do facts module to get latest information
@@ -77,3 +75,5 @@
   when:
     - local_container is defined
     - local_container | length != 0
+
+...
