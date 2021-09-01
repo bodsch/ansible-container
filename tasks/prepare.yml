@@ -23,12 +23,14 @@
     container_volumes: "{{ container | container_volumes }}"
 
 - name: create base directory to persist docker environnments
+  become: true
   file:
     name: "{{ container_env_directory }}"
     state: directory
     mode: 0o755
 
 - name: create application directory to persist docker environnments
+  become: true
   file:
     name: "{{ container_env_directory }}/{{ item }}"
     state: directory
@@ -65,9 +67,10 @@
     container: "{{ container | remove_environments }}"
 
 - name: make sure ansible local facts directory exists
+  become: true
   file:
     dest: /etc/ansible/facts.d
     state: directory
     owner: root
     group: root
-    mode: 0o755
+    mode: 0o775
