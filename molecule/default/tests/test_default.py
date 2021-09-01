@@ -57,10 +57,10 @@ def test_directory(host, get_vars):
 
 
 @pytest.mark.parametrize("files", [
-    "nginx",
+    "nginx-proxy",
+    "whoami"
 ])
 def test_files(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))
     f = host.file("{0}/{1}/container.env".format(dir.linked_to, files))
-    assert f.exists
     assert f.is_file
