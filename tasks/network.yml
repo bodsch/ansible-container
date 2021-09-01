@@ -8,5 +8,9 @@
       - subnet: "{{ item.subnet }}"
         gateway: "{{ item.gateway }}"
         iprange: "{{ item.iprange }}"
-  with_items: "{{ container_network }}"
+  loop: "{{ container_network }}"
+  loop_control:
+    label: "{{ item.name.ljust(12) }}: {{ item.iprange }}"
   when: container_use_network
+
+...
