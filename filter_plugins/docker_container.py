@@ -5,6 +5,7 @@ __metaclass__ = type
 from ansible.utils.display import Display
 
 import json
+from ruamel.yaml import YAML
 import itertools
 
 # https://docs.ansible.com/ansible/latest/dev_guide/developing_plugins.html
@@ -230,7 +231,12 @@ class FilterModule(object):
         )
 
         for v in merged:
-            _local_volume = v.split(':')[0]
+            _volumes = v.split(':')
+            field_count = len(_volumes)
+            _local_volume = _volumes[0]
+
+            display.v("fields : {} {}    == {} ".format(field_count, _local_volume, _volumes))
+
             #
             if not (
                 _local_volume.endswith(volume_block_list_ends) or _local_volume.startswith(volume_block_list_starts)
@@ -240,6 +246,30 @@ class FilterModule(object):
         # deduplicate entries
         result = list(set(result))
         result = sorted(result)
+
+        display.v("return : {}".format(result))
+
+        yaml = YAML()
+        # yaml.indent(mapping=4, sequence=6, offset=3)
+
+        for v in merged:
+            values = v.split(':')
+            count = len(values)
+
+            res = dict(
+                local = values[0],
+                remote = values[1],
+            )
+            if values[2]:
+                res['mount'] = values[2]
+
+            if len(values) == 4 and values[3]:
+
+                d = values[3].replace('=',': ')
+                code = yaml.load(d)
+                res['ansible'] = dict(code)
+
+            result.append(res)
 
         display.v("return : {}".format(result))
 
