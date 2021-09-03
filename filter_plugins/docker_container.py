@@ -24,6 +24,7 @@ class FilterModule(object):
             'container_names': self.filter_names,
             'container_images': self.filter_images,
             'container_volumes': self.filter_volumes,
+            'remove_custom_fields': self.remove_custom_fields,
             'remove_environments': self.filter_remove_env,
             'changed': self.filter_changed,
             'update': self.filter_update,
@@ -230,48 +231,67 @@ class FilterModule(object):
             '/dev',
         )
 
-        for v in merged:
-            _volumes = v.split(':')
-            field_count = len(_volumes)
-            _local_volume = _volumes[0]
-
-            display.v("fields : {} {}    == {} ".format(field_count, _local_volume, _volumes))
-
-            #
-            if not (
-                _local_volume.endswith(volume_block_list_ends) or _local_volume.startswith(volume_block_list_starts)
-            ):
-                result.append(_local_volume)
-
-        # deduplicate entries
-        result = list(set(result))
-        result = sorted(result)
-
-        display.v("return : {}".format(result))
-
         yaml = YAML()
-        # yaml.indent(mapping=4, sequence=6, offset=3)
+
+        def custom_fields(d):
+            d = d.replace('=', ': ')
+
+            if d.startswith("[") and d.endswith("]"):
+                d = d.replace("[", "")
+                d = d.replace("]", "")
+
+            if not (d.startswith("{") and d.endswith("}")):
+                d = "{" + d + "}"
+
+            code = yaml.load(d)
+
+            return dict(code)
 
         for v in merged:
+            values = v.split('|')
+
+            c_fields = dict()
+
+            if len(values) == 2 and values[1]:
+                c_fields = custom_fields(values[1])
+
             values = v.split(':')
             count = len(values)
 
-            res = dict(
-                local = values[0],
-                remote = values[1],
-            )
-            if values[2]:
-                res['mount'] = values[2]
+            display.v("count : {}".format(count))
 
-            if len(values) == 4 and values[3]:
+            local_volume = values[0]
+            if not (
+                local_volume.endswith(volume_block_list_ends) or local_volume.startswith(volume_block_list_starts)
+            ):
+                res = dict(
+                    # docker = "{}:{}".format(values[0], values[1]) + ":{}".format(values[2]) if values[2]
+                    local = values[0],
+                    remote = values[1],
+                )
+                if count == 3 and values[2]:
+                    res['mount'] = values[2]
 
-                d = values[3].replace('=',': ')
-                code = yaml.load(d)
-                res['ansible'] = dict(code)
+                if c_fields and len(c_fields) > 0:
+                    res['ansible'] = c_fields
 
-            result.append(res)
+                result.append(res)
 
         display.v("return : {}".format(result))
+
+        return result
+
+    def remove_custom_fields(self, data):
+        """
+
+        """
+        result = []
+
+        if isinstance(data, list):
+            for v in data:
+                result.append(v.split('|')[0])
+        else:
+            result = data
 
         return result
 

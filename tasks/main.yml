@@ -1,9 +1,9 @@
 ---
 
 - include_tasks: prepare.yml
-# - include_tasks: network.yml
-# - include_tasks: login.yml
-# - include_tasks: download.yml
-# - include_tasks: launch_container.yml
+- include_tasks: network.yml
+- include_tasks: login.yml
+- include_tasks: download.yml
+- include_tasks: launch_container.yml
 
 ...
