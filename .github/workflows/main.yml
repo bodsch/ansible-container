@@ -5,7 +5,7 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - main
   schedule:
     - cron: "0 2 * * 0"
 
@@ -79,7 +79,7 @@ jobs:
           DISTRIBUTION: ${{ matrix.image }}
 
   publish:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     needs:
       - deb_standard
     runs-on: ubuntu-18.04
