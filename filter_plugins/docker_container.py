@@ -5,6 +5,7 @@ __metaclass__ = type
 from ansible.utils.display import Display
 
 import json
+from ruamel.yaml import YAML
 import itertools
 
 # https://docs.ansible.com/ansible/latest/dev_guide/developing_plugins.html
@@ -23,6 +24,7 @@ class FilterModule(object):
             'container_names': self.filter_names,
             'container_images': self.filter_images,
             'container_volumes': self.filter_volumes,
+            'remove_custom_fields': self.remove_custom_fields,
             'remove_environments': self.filter_remove_env,
             'changed': self.filter_changed,
             'update': self.filter_update,
@@ -229,19 +231,67 @@ class FilterModule(object):
             '/dev',
         )
 
-        for v in merged:
-            _local_volume = v.split(':')[0]
-            #
-            if not (
-                _local_volume.endswith(volume_block_list_ends) or _local_volume.startswith(volume_block_list_starts)
-            ):
-                result.append(_local_volume)
+        yaml = YAML()
 
-        # deduplicate entries
-        result = list(set(result))
-        result = sorted(result)
+        def custom_fields(d):
+            d = d.replace('=', ': ')
+
+            if d.startswith("[") and d.endswith("]"):
+                d = d.replace("[", "")
+                d = d.replace("]", "")
+
+            if not (d.startswith("{") and d.endswith("}")):
+                d = "{" + d + "}"
+
+            code = yaml.load(d)
+
+            return dict(code)
+
+        for v in merged:
+            values = v.split('|')
+
+            c_fields = dict()
+
+            if len(values) == 2 and values[1]:
+                c_fields = custom_fields(values[1])
+
+            values = v.split(':')
+            count = len(values)
+
+            display.v("count : {}".format(count))
+
+            local_volume = values[0]
+            if not (
+                local_volume.endswith(volume_block_list_ends) or local_volume.startswith(volume_block_list_starts)
+            ):
+                res = dict(
+                    # docker = "{}:{}".format(values[0], values[1]) + ":{}".format(values[2]) if values[2]
+                    local = values[0],
+                    remote = values[1],
+                )
+                if count == 3 and values[2]:
+                    res['mount'] = values[2]
+
+                if c_fields and len(c_fields) > 0:
+                    res['ansible'] = c_fields
+
+                result.append(res)
 
         display.v("return : {}".format(result))
+
+        return result
+
+    def remove_custom_fields(self, data):
+        """
+
+        """
+        result = []
+
+        if isinstance(data, list):
+            for v in data:
+                result.append(v.split('|')[0])
+        else:
+            result = data
 
         return result
 

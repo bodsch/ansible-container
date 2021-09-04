@@ -26,7 +26,7 @@
     memory_swap: "{{ item.memory_swap | default(omit) }}"
     memory_swappiness: "{{ item.memory_swappiness | default(omit) }}"
     privileged: "{{ item.privileged | default(omit) }}"
-    volumes: "{{ item.volumes | default(omit) }}"
+    volumes: "{{ item.volumes | default([]) | remove_custom_fields }}"
     capabilities: "{{ item.capabilities | default(omit) }}"
     exposed_ports: "{{ item.exposed_ports | default(omit) }}"
     published_ports: "{{ item.published_ports | default(omit) }}"
