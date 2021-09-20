@@ -13,7 +13,8 @@
       # '*': ignore
       image: strict   # don't restart containers with older versions of the image
       env: strict     # we want precisely this environment
-    log_driver: json-file
+    log_driver: "{{ item.log_driver | default('json-file') }}"
+    log_options: "{{ item.log_options | default({}) }}"
     output_logs: true
     command: "{{ item.command | default(omit) }}"
     cpu_period: "{{ item.cpu_period | default(omit) }}"
@@ -32,10 +33,11 @@
     published_ports: "{{ item.published_ports | default(omit) }}"
     ulimits: "{{ item.ulimits | default(omit) }}"
     kernel_memory: "{{ item.kernel_memory | default(omit) }}"
-    networks_cli_compatible: true
+    # networks_cli_compatible: true
     # ansible 2.10
-    # container_default_behavior: "compatibility"
+    container_default_behavior: "compatibility"
     networks: "{{ item.networks | default(omit) }}"
+    network_mode: "{{ item.network_mode | default('bridge') }}"
     dns_servers: "{{ item.dns_servers | default(omit) }}"
     etc_hosts: "{{ item.etc_hosts | default(omit) }}"
     links: "{{ item.links | default(omit) }}"
@@ -51,3 +53,5 @@
   file:
     path: /etc/ansible/facts.d/update_container.fact
     state: absent
+
+...
