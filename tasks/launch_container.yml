@@ -1,6 +1,56 @@
 ---
 
-- name: "launching container "
+- name: "launching container (ansible < 2.10)"
+  docker_container:
+    name: "{{ item.name }}"
+    hostname: "{{ item.name }}"
+    image: "{{ item.image }}"
+    state: "{{ item.state | default('started') }}"
+    recreate: "{{ item.recreate | default(omit) }}"  # <==  RESTARTS container after EVERY ansible run
+    restart: "{{ item.restart | default(omit) }}"
+    restart_policy: "{{ item.restart_policy | default('on-failure') }}"
+    comparisons:
+      # '*': ignore
+      image: strict   # don't restart containers with older versions of the image
+      env: strict     # we want precisely this environment
+    log_driver: "{{ item.log_driver | default('json-file') }}"
+    log_options: "{{ item.log_options | default({}) }}"
+    output_logs: true
+    command: "{{ item.command | default(omit) }}"
+    cpu_period: "{{ item.cpu_period | default(omit) }}"
+    cpu_quota: "{{ item.cpu_quota | default(omit) }}"
+    cpu_shares: "{{ item.cpu_shares | default(omit) }}"
+    cpuset_cpus: "{{ item.cpuset_cpus | default(omit) }}"
+    cpuset_mems: "{{ item.cpuset_mems | default(omit) }}"
+    memory: "{{ item.memory | default(omit) }}"
+    memory_reservation: "{{ item.memory_reservation | default(omit) }}"
+    memory_swap: "{{ item.memory_swap | default(omit) }}"
+    memory_swappiness: "{{ item.memory_swappiness | default(omit) }}"
+    privileged: "{{ item.privileged | default(omit) }}"
+    volumes: "{{ item.volumes | default([]) | remove_custom_fields }}"
+    capabilities: "{{ item.capabilities | default(omit) }}"
+    exposed_ports: "{{ item.exposed_ports | default(omit) }}"
+    published_ports: "{{ item.published_ports | default(omit) }}"
+    ulimits: "{{ item.ulimits | default(omit) }}"
+    kernel_memory: "{{ item.kernel_memory | default(omit) }}"
+    networks_cli_compatible: true
+    # ansible 2.10
+    # container_default_behavior: "compatibility"
+    networks: "{{ item.networks | default(omit) }}"
+    network_mode: "{{ item.network_mode | default('bridge') }}"
+    dns_servers: "{{ item.dns_servers | default(omit) }}"
+    etc_hosts: "{{ item.etc_hosts | default(omit) }}"
+    links: "{{ item.links | default(omit) }}"
+    healthcheck: "{{ item.healthcheck | default(omit) }}"
+    labels: "{{ item.labels | default(omit) }}"
+    env_file: "{{ container_env_directory }}/{{ item.name }}/container.env"
+  register: create_container_instances
+  with_items: "{{ container }}"
+  loop_control:
+    label: "{{ item.name }} - hostname: {{ item.name }} - image: {{ item.image }}"
+  when: "ansible_version.full is version_compare('2.10', '<')"
+
+- name: "launching container (ansible >= 2.10)"
   docker_container:
     name: "{{ item.name }}"
     hostname: "{{ item.name }}"
@@ -48,6 +98,7 @@
   with_items: "{{ container }}"
   loop_control:
     label: "{{ item.name }} - hostname: {{ item.name }} - image: {{ item.image }}"
+  when: "ansible_version.full is version_compare('2.10', '>=')"
 
 - name: remove update fact
   file:
