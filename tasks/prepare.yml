@@ -55,19 +55,15 @@
   file:
     name: "{{ item.local }}"
     state: directory
-    owner: "{{ item.ansible.owner | default('1000') }}"
-    group: "{{ item.ansible.group | default('1000') }}"
-    mode: "{{ item.ansible.mode | default('0o755') }}"
+    owner: "{{ item.ansible.owner | default(omit) }}"
+    group: "{{ item.ansible.group | default(omit) }}"
+    mode: "{{ item.ansible.mode | default(omit) }}"
   loop: "{{ container_volumes }}"
   loop_control:
-    label: "{{ item.local }} - owner: {{ item.ansible.owner | default('1000') }} group: {{ item.ansible.group | default('1000') }} mode: {{ item.ansible.mode | default('0o755') }}"
-
-# - name: d
-#   debug:
-#     msg: "{{ item.volumes | default([]) | remove_custom_fields }}"
-#   loop: "{{ container }}"
-#   loop_control:
-#     label: "{{ item.volumes | default([]) | remove_custom_fields }}"
+    label: "{{ item.local }} /
+      owner: {{ item.ansible.owner | default('-') }}
+      group: {{ item.ansible.group | default('-') }}
+      mode: {{ item.ansible.mode   | default('-') }}"
 
 - name: remove environnments from container
   set_fact:
