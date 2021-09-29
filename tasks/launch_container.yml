@@ -13,7 +13,7 @@
       # '*': ignore
       image: strict   # don't restart containers with older versions of the image
       env: strict     # we want precisely this environment
-      labels: strict
+      labels: ignore
     log_driver: "{{ item.log_driver | default('json-file') }}"
     log_options: "{{ item.log_options | default({}) }}"
     output_logs: true
@@ -65,7 +65,7 @@
       # '*': ignore
       image: strict   # don't restart containers with older versions of the image
       env: strict     # we want precisely this environment
-      labels: strict
+      labels: ignore
     log_driver: "{{ item.log_driver | default('json-file') }}"
     log_options: "{{ item.log_options | default({}) }}"
     output_logs: true
@@ -87,7 +87,7 @@
     published_ports: "{{ item.published_ports | default(omit) }}"
     ulimits: "{{ item.ulimits | default(omit) }}"
     kernel_memory: "{{ item.kernel_memory | default(omit) }}"
-    # networks_cli_compatible: true
+    networks_cli_compatible: true
     # ansible 2.10
     container_default_behavior: "compatibility"
     networks: "{{ item.networks | default(omit) }}"
