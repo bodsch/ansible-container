@@ -220,20 +220,32 @@ class FilterModule(object):
         volumes = self._get_keys_from_dict(data, 'volumes')
         merged = list(itertools.chain(*volumes))
 
+        #  - testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
+        # local        : testing5
+        # remote       : /var/tmp/testing5
+        # mount        : -
+        # custom_fields: {owner="1001",mode="0700",ignore=True}
+
         # filter volumes with this endings
         volume_block_list_ends = (
             '.pid',
             '.sock',
             '.socket',
+            '.conf',
+            '.config',
         )
         volume_block_list_starts = (
             '/sys',
             '/dev',
+            '/run',
         )
 
         yaml = YAML()
 
         def custom_fields(d):
+            """
+              returns only custom fileds as json
+            """
             d = d.replace('=', ': ')
 
             if d.startswith("[") and d.endswith("]"):
@@ -248,26 +260,31 @@ class FilterModule(object):
             return dict(code)
 
         for v in merged:
-            values = v.split('|')
-
             c_fields = dict()
+            values = v.split('|')
 
             if len(values) == 2 and values[1]:
                 c_fields = custom_fields(values[1])
+                v = values[0]
 
             values = v.split(':')
             count = len(values)
 
-            display.v("count : {}".format(count))
+            local_volume  = values[0]
+            remote_volume = values[1]
 
-            local_volume = values[0]
+            # display.v(" = {}".format(values))
+            # display.v("   count         : {}".format(count))
+            # display.v("   custom_fields : {}".format(json.dumps(c_fields, indent=2, sort_keys=True)))
+
+            # local_volume = values[0]
             if not (
                 local_volume.endswith(volume_block_list_ends) or local_volume.startswith(volume_block_list_starts)
             ):
                 res = dict(
                     # docker = "{}:{}".format(values[0], values[1]) + ":{}".format(values[2]) if values[2]
-                    local = values[0],
-                    remote = values[1],
+                    local = local_volume, # values[0],
+                    remote = remote_volume # values[1],
                 )
                 if count == 3 and values[2]:
                     res['mount'] = values[2]
@@ -277,7 +294,7 @@ class FilterModule(object):
 
                 result.append(res)
 
-        display.v("return : {}".format(result))
+        display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
 
         return result
 

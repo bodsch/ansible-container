@@ -64,6 +64,9 @@
       owner: {{ item.ansible.owner | default('-') }}
       group: {{ item.ansible.group | default('-') }}
       mode: {{ item.ansible.mode   | default('-') }}"
+  when:
+    - item.ansible.ignore is defined
+    - not item.ansible.ignore
 
 - name: remove environnments from container
   set_fact:

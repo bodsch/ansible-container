@@ -26,6 +26,7 @@ container:
       - testing2:/var/tmp/testing2|{owner="800",group="999",mode="0700"}
       - testing3:/var/tmp/testing3:rw|{owner="999",group="1000"}
       - testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
+      - testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
 
   - name: whoami
     state: absent
