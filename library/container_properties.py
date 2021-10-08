@@ -77,9 +77,9 @@ class ContainerProperties(object):
               alles gleich
             """
             return dict(
-              changed=False,
-              failed=False,
-              msg="no changes"
+                changed=False,
+                failed=False,
+                msg="no changes"
             )
 
         with open(self.dest, "w") as f:
@@ -89,9 +89,9 @@ class ContainerProperties(object):
                 f.write(checksum)
 
             result = dict(
-              changed=True,
-              failed=False,
-              msg="property file successful written"
+                changed=True,
+                failed=False,
+                msg="property file successful written"
             )
 
         return result
@@ -99,8 +99,6 @@ class ContainerProperties(object):
     def __checksum(self, plaintext):
         """
         """
-        import hashlib
-
         if isinstance(plaintext, dict):
             password_bytes = json.dumps(plaintext, sort_keys=True).encode('utf-8')
         else:
@@ -155,4 +153,3 @@ def main():
 # import module snippets
 if __name__ == '__main__':
     main()
-

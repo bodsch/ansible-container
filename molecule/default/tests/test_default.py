@@ -66,6 +66,7 @@ def test_environments(host, get_vars, files):
     f = host.file("{0}/{1}/container.env".format(dir.linked_to, files))
     assert f.is_file
 
+
 @pytest.mark.parametrize("files", [
     "hello-world"
 ])
