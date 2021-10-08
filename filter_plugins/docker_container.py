@@ -26,6 +26,7 @@ class FilterModule(object):
             'container_volumes': self.filter_volumes,
             'remove_custom_fields': self.remove_custom_fields,
             'remove_environments': self.filter_remove_env,
+            'remove_properties': self.filter_remove_prop,
             'changed': self.filter_changed,
             'update': self.filter_update,
         }
@@ -149,25 +150,26 @@ class FilterModule(object):
 
     def filter_names(self, data):
         """
-
         """
         return self._get_keys_from_dict(data, 'name')
 
     def filter_images(self, data):
         """
-
         """
         return self._get_keys_from_dict(data, 'image')
 
     def filter_remove_env(self, data):
         """
-
         """
         return self._del_keys_from_dict(data, 'environments')
 
+    def filter_remove_prop(self, data):
+        """
+        """
+        return self._del_keys_from_dict(data, 'properties')
+
     def filter_changed(self, data):
         """
-
         """
         result = []
 
