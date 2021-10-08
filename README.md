@@ -26,7 +26,7 @@ container_registry:
   password: ''
 ```
 
-### container configuration
+## container configuration
 
 
 ```yaml
@@ -54,15 +54,24 @@ container:
         DEBUG_ENTRYPOINT: "false"
         # ...
         HEAP_DUMP_FILENAME: workflow-server-heapdump
+      properties:
+        publisher.maxRecursionDepth: 600
 ```
+## environments
 
 All `environments` entries are persisted to a separate environments file on the target system.
 
-E.g. under `/opt/container/${CONTAINER_NAME}/environment.env`
+E.g. under `/opt/container/${CONTAINER_NAME}/container.env`
 
 The target directory for persistence can be customized via `container_env_directory`.
 
-### custom fileds for volumes
+## properties
+
+All `properties` entries are persisted to a separate properties file on the target system.
+
+E.g. under `/opt/container/${CONTAINER_NAME}/${CONTAINER_NAME}.properties`
+
+## custom fileds for volumes
 
 The idea behind the cutom_fields is to define corresponding rights in addition to the optional creation of the directories.
 

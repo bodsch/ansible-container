@@ -7,6 +7,7 @@ container_network:
     iprange: 172.3.27.0/26
 
   - name: monitoring
+    state: absent
     enable_ipv6: false
     subnet: 172.9.27.0/24
     gateway: 172.9.27.2
@@ -19,7 +20,7 @@ container:
     published_ports:
       - 80:80
     volumes:
-      - /run/docker.sock:/run/docker.sock:ro
+      - /run/docker.sock:/tmp/docker.sock:ro
       - /tmp/nginx:/tmp/nginx:ro
       - /dev/foo:/dev/foo:ro
       - /tmp/testing1:/var/tmp/testing1|{owner="1000",group="1000",mode="0755"}
@@ -33,5 +34,19 @@ container:
     image: jwilder/whoami
     environments:
       VIRTUAL_HOST: whoami.local
+
+
+  - name: hello-world
+    hostname: hello-world
+    image: hello-world
+    properties:
+      #
+      publisher.maxRecursionDepth: 600
+      # user and password for login to the staging serve
+      replicator.user: 'replicator'
+      replicator.password: 'replicator'
+      # replicator.domain: ''
+      replicator.tmp_dir: 'var/tmp'
+
 
 ...
