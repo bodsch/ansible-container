@@ -80,11 +80,11 @@
 
 - name: remove environnments from container
   set_fact:
-    container: "{{ container | remove_environments }}"
+    container: "{{ container | remove_values('environments') }}"
 
 - name: remove properties from container
   set_fact:
-    container: "{{ container | remove_properties }}"
+    container: "{{ container | remove_values('properties') }}"
 
 - name: make sure ansible local facts directory exists
   become: true
