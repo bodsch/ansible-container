@@ -64,7 +64,25 @@ The target directory for persistence can be customized via `container_env_direct
 
 ### custom fileds for volumes
 
+The idea behind the cutom_fields is to define corresponding rights in addition to the optional creation of the directories.
+
+**For example:**
+
+One can persist the data directory in the host system for a solr container and also assign the correct rights to this directory.
+
+However, since it is also possible to mount files or sockets in the container via volumes, it is possible here to prevent the creation of a directory using `ignore`.
+
+The following variables can be used:
+
+- `owner`
+- `group`
+- `mode`
+- `ignore`
+
+### Example
+
 ```yaml
+
     volumes:
       - /run/docker.sock:/run/docker.sock:ro
       - /tmp/nginx:/tmp/nginx:ro

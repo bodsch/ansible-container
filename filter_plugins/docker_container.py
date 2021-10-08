@@ -283,8 +283,8 @@ class FilterModule(object):
             ):
                 res = dict(
                     # docker = "{}:{}".format(values[0], values[1]) + ":{}".format(values[2]) if values[2]
-                    local = local_volume, # values[0],
-                    remote = remote_volume # values[1],
+                    local = local_volume,  # values[0],
+                    remote = remote_volume  # values[1],
                 )
                 if count == 3 and values[2]:
                     res['mount'] = values[2]
