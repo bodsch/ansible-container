@@ -18,6 +18,7 @@
     log_options: "{{ item.log_options | default({}) }}"
     output_logs: true
     command: "{{ item.command | default(omit) }}"
+    cpus: "{{ item.cpus | default(omit) }}"
     cpu_period: "{{ item.cpu_period | default(omit) }}"
     cpu_quota: "{{ item.cpu_quota | default(omit) }}"
     cpu_shares: "{{ item.cpu_shares | default(omit) }}"
@@ -70,6 +71,7 @@
     log_options: "{{ item.log_options | default({}) }}"
     output_logs: true
     command: "{{ item.command | default(omit) }}"
+    cpus: "{{ item.cpus | default(omit) }}"
     cpu_period: "{{ item.cpu_period | default(omit) }}"
     cpu_quota: "{{ item.cpu_quota | default(omit) }}"
     cpu_shares: "{{ item.cpu_shares | default(omit) }}"
