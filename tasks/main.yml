@@ -1,9 +1,30 @@
 ---
 
-- include_tasks: prepare.yml
-- include_tasks: network.yml
-- include_tasks: login.yml
-- include_tasks: download.yml
-- include_tasks: launch_container.yml
+- name: preparement
+  include_tasks: prepare.yml
+
+# - name: network
+#   include_tasks: network.yml
+#
+# - name: login into container registry
+#   include_tasks: login.yml
+#
+# - name: download new container
+#   include_tasks: download.yml
+#
+# - name: execute pre-tasks
+#   include_tasks: pre-tasks.yml
+#   when:
+#     - container_pre_tasks is defined
+#     - container_pre_tasks | count > 0
+#
+# - name: launch container
+#   include_tasks: launch_container.yml
+#
+# - name: execute post-tasks
+#   include_tasks: post-tasks.yml
+#   when:
+#     - container_post_tasks is defined
+#     - container_post_tasks | count > 0
 
 ...

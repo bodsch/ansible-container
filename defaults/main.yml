@@ -9,6 +9,9 @@ container_registry:
 
 container: {}
 
+container_pre_tasks: []
+container_post_tasks: []
+
 container_use_network: true
 container_network: []
 #   - name: docker_network
