@@ -95,45 +95,4 @@
     group: root
     mode: 0o777
 
-- name: validate pre tasks
-  block:
-    - name: ensure tasks are available
-      stat:
-        path: "{{ item }}"
-        get_checksum: false
-        get_md5: false
-        get_mime: false
-        get_attributes: false
-      register: _pre_task_available
-      loop: "{{ container_pre_tasks }}"
-
-    - name: debuf
-      debug:
-        msg: "{{ _pre_task_available | map(attribute='exists') }}"
-  when:
-    - container_pre_tasks is defined
-    - container_pre_tasks | count > 0
-
-- name: validate post tasks
-  block:
-    - name: ensure tasks are available
-      stat:
-        path: "{{ item }}"
-        get_checksum: false
-        get_md5: false
-        get_mime: false
-        get_attributes: false
-      register: _post_task_available
-      loop: "{{ container_post_tasks }}"
-
-    - name: debuf
-      debug:
-        msg: "{{ _post_task_available }}"
-  when:
-    - container_post_tasks is defined
-    - container_post_tasks | count > 0
-
-
-
-
 ...

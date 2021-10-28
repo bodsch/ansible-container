@@ -16,6 +16,7 @@ class FilterModule(object):
     """
       ansible filter
     """
+
     def filters(self):
         return {
             'container_hashes': self.filter_hashes,
@@ -27,6 +28,7 @@ class FilterModule(object):
             'remove_custom_fields': self.remove_custom_fields,
             'changed': self.filter_changed,
             'update': self.filter_update,
+            'files_available': self.files_available,
         }
 
     def filter_hashes(self, mydict):
@@ -258,6 +260,24 @@ class FilterModule(object):
                 result.append(v.split('|')[0])
         else:
             result = data
+
+        return result
+
+    def files_available(self, data):
+        """
+        """
+        result = []
+
+        # display.v(f"found: {data} ({type(data)})")
+
+        for k in data:
+            # display.v(f"  - {k} ({type(k)})")
+            # display.v(json.dumps(k, indent=4, sort_keys=True) )
+
+            if k.get('stat', {}).get('exists', False):
+                result.append(k.get('item'))
+
+        display.v("return : {}".format(result))
 
         return result
 

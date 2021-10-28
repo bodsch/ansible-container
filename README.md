@@ -26,6 +26,25 @@ container_registry:
   password: ''
 ```
 
+### pre and post tasks
+
+```yaml
+container_pre_tasks: []
+container_post_tasks: []
+```
+
+You can define your own pre- or post-tasks.
+The individual scripts are executed before or after (re)starting the containers.  
+For example, you can use them to remove old container images, volumes ore othe things.  
+A few example scripts can be found under [`files`](./files):
+
+- `prune.sh`
+- `list_all_container.sh`
+- `list_all_images.sh`
+- `remove_stopped_container.sh`
+- `remove_untagged_images.sh`
+
+
 ## container configuration
 
 
