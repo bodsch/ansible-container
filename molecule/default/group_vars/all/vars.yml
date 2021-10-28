@@ -48,5 +48,10 @@ container:
       # replicator.domain: ''
       replicator.tmp_dir: 'var/tmp'
 
+container_pre_tasks:
+  - /usr/local/bin/list_all_images.sh
+
+container_post_tasks:
+  - /usr/local/bin/prune.sh
 
 ...

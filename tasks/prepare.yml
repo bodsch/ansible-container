@@ -1,6 +1,6 @@
 ---
 
-- name: install dedendency
+- name: install dependency
   package:
     name: "{{ container_packages }}"
     state: present
