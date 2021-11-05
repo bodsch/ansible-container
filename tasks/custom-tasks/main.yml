@@ -11,6 +11,7 @@
     - list_all_images.sh
     - remove_stopped_container.sh
     - remove_untagged_images.sh
+    - parse_container_fact.sh
 
 - name: validate pre tasks
   block:

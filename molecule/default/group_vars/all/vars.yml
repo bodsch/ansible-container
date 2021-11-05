@@ -15,8 +15,8 @@ container_network:
 
 container:
   - name: nginx-proxy
-    hostname: nginx-prox
-    image: jwilder/nginx-proxy
+    hostname: nginx-proxy
+    image: jwilder/nginx-proxy:0.9.3-alpine
     published_ports:
       - 80:80
     volumes:
@@ -30,15 +30,14 @@ container:
       - /tmp/testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
 
   - name: whoami
-    state: absent
+    # state: absent
     image: jwilder/whoami
     environments:
       VIRTUAL_HOST: whoami.local
 
-
   - name: hello-world
     hostname: hello-world
-    image: hello-world
+    image: hello-world:latest
     properties:
       #
       publisher.maxRecursionDepth: 600
@@ -50,8 +49,9 @@ container:
 
 container_pre_tasks:
   - /usr/local/bin/list_all_images.sh
+  - /usr/local/bin/parse_container_fact.sh
 
 container_post_tasks:
-  - /usr/local/bin/prune.sh
+  - /usr/local/bin/remove_untagged_images.sh
 
 ...

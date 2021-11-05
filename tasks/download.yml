@@ -17,7 +17,6 @@
   set_fact:
     container_update_needed: true
     container_changed: "{{ _container_image_pull_information | changed }}"
-    container: "{{ container | update(container_changed) }}"
   when:
     - _container_image_pull_information.changed
 
@@ -60,7 +59,7 @@
         dest: /etc/ansible/facts.d/update_container.fact
         owner: root
         group: root
-        mode: 0o644
+        mode: 0o755
       when: container_update_needed
 
     - name: do facts module to get latest information

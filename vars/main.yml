@@ -1,26 +1,6 @@
 ---
 
-_container_packages:
-  default:
-    - openssl
-    - python3-docker
-  centos:
-    - openssl
-    - python36-docker
-  debian:
-    - openssl
-    - python3-docker
-    - python3-pip
-  amazon: []
-  alpine:
-    - openssl
-    - docker-py
-
-container_packages: "{{
-          _container_packages[ansible_distribution | lower ~ '-' ~ ansible_distribution_major_version ] |
-  default(_container_packages[ansible_distribution | lower ~ '-' ~ ansible_distribution_major_version] |
-  default(_container_packages[ansible_distribution | lower] |
-  default(_container_packages['default']))) }}"
+container_packages: []
 
 container_update_needed: false
 
@@ -33,3 +13,5 @@ _container_image_pull_information: {}
 _container_local_image_information: {}
 
 container_changed: []
+
+...

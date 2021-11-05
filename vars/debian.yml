@@ -1,0 +1,9 @@
+---
+
+container_packages:
+  - openssl
+  - python3-docker
+  - python3-pip
+  - jq
+
+...
