@@ -1,6 +1,7 @@
 ---
 
 - name: copy custom tasks
+  become: true
   copy:
     src: "{{ item }}"
     dest: "/usr/local/bin"
