@@ -60,6 +60,7 @@
     label: "{{ item }}"
 
 - name: persist application docker environnments
+  become: true
   template:
     src: container.env.j2
     dest: "{{ container_env_directory }}/{{ item.name }}/container.env"
@@ -69,6 +70,7 @@
     label: "{{ item.name }}"
 
 - name: persist application properties
+  become: true
   container_properties:
     dest: "{{ container_env_directory }}/{{ item.name }}/{{ item.name }}.properties"
     properties: "{{ item.properties }}"
