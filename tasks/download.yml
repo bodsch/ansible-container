@@ -20,17 +20,17 @@
   when:
     - _container_image_pull_information.changed
 
-- name: all images are up to date ...
+- name: all images are up to date
   debug:
     msg:
       - all images are up to date ...
   when: not container_update_needed
 
-- name: update needed ...
+- name: container restart needed
   debug:
     msg:
-      - update needed ...
-      - "changed image(s) {{ container_changed }}"
+      - container restart needed ...
+      - "changed container(s) {{ container_changed }}"
   when:
     - container_update_needed
 

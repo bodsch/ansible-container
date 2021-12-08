@@ -1,0 +1,55 @@
+---
+
+- name: converge
+  hosts: all
+  any_errors_fatal: false
+  gather_facts: true
+
+  environment:
+    NETRC: ''
+
+  vars:
+    container_update:
+      - name: hello-world
+        hostname: hello-world
+        image: hello-world:latest
+        properties:
+          #
+          publisher.maxRecursionDepth: 200
+          # user and password for login to the staging serve
+          replicator.user: 'replicator'
+          replicator.password: 'replicator'
+          # replicator.domain: ''
+          replicator.tmp_dir: 'var/tmp'
+
+  roles:
+    - role: ansible-container
+
+# ----------------------------------------------------------------------------------
+
+- name: update
+  hosts: all
+  any_errors_fatal: false
+  gather_facts: true
+
+  environment:
+    NETRC: ''
+
+  vars:
+    container_update:
+      - name: hello-world
+        hostname: hello-world
+        image: hello-world:latest
+        properties:
+          #
+          publisher.maxRecursionDepth: 900
+          # user and password for login to the staging serve
+          replicator.user: 'replicator'
+          replicator.password: 'replicator'
+          # replicator.domain: ''
+          replicator.tmp_dir: 'var/tmp'
+
+  roles:
+    - role: ansible-container
+
+...

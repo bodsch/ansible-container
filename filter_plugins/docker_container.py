@@ -27,6 +27,7 @@ class FilterModule(object):
             'remove_values': self.remove_values,
             'remove_custom_fields': self.remove_custom_fields,
             'changed': self.filter_changed,
+            'properties_changed': self.filter_properties_changed,
             'update': self.filter_update,
             'files_available': self.files_available,
         }
@@ -157,13 +158,36 @@ class FilterModule(object):
 
         return result
 
+    def filter_properties_changed(self, data):
+        """
+        """
+        result = []
+        # display.v("filter_properties_changed({})".format({}))
+
+        if(isinstance(data, dict)):
+            data = data['results']
+
+        for i in data:
+            if(isinstance(i, dict)):
+                changed = i.get('changed', False)
+                item    = i.get('item', {}).get('name', None)
+
+                if changed:
+                    result.append(item)
+
+        display.v("  = result {}".format(result))
+
+        return result
+
     def filter_update(self, data, update):
         """
           add recreate to changed container entry
         """
+        display.v("filter_update(data, {})".format(update))
+
         for change in update:
             for d in data:
-                if(d.get('image') == change):
+                if d.get('image') == change or d.get('name') == change:
                     d['recreate'] = "true"
 
         return data

@@ -43,6 +43,7 @@ A few example scripts can be found under [`files`](./files):
 - `list_all_images.sh`
 - `remove_stopped_container.sh`
 - `remove_untagged_images.sh`
+- `parse_container_fact.sh`
 
 
 ## container configuration
