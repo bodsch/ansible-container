@@ -77,8 +77,22 @@
   loop: "{{ container }}"
   loop_control:
     label: "{{ item.name }}"
+  register: changed_application_properties
   when:
     - item.properties is defined
+
+- name: container restart needed after property changes  # noqa no-handler
+  set_fact:
+    container_update_needed: true
+    container_changed: "{{ changed_application_properties | properties_changed }}"
+  when:
+    - changed_application_properties.changed
+
+- name: update container for recreate running docker instance
+  set_fact:
+    container: "{{ container | update(container_changed) }}"
+  when:
+    - container_update_needed
 
 - name: create container volumes
   become: true
@@ -98,13 +112,13 @@
   when:
     - not item.ansible.ignore | default('false') | bool
 
-- name: remove environnments from container
-  set_fact:
-    container: "{{ container | remove_values('environments') }}"
-
-- name: remove properties from container
-  set_fact:
-    container: "{{ container | remove_values('properties') }}"
+# - name: remove environnments from container
+#   set_fact:
+#     container: "{{ container | remove_values('environments') }}"
+#
+# - name: remove properties from container
+#   set_fact:
+#     container: "{{ container | remove_values('properties') }}"
 
 - name: make sure ansible local facts directory exists
   become: true
