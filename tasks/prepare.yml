@@ -40,6 +40,10 @@
   set_fact:
     container_volumes: "{{ container | container_volumes }}"
 
+- name: detect container mountpoints
+  set_fact:
+    container_mounts: "{{ container | container_mounts }}"
+
 - name: create base directory to persist docker environnments
   become: true
   file:
@@ -111,6 +115,21 @@
       mode: {{ item.ansible.mode   | default('-') }}"
   when:
     - not item.ansible.ignore | default('false') | bool
+
+- name: create container mountpoints
+  become: true
+  file:
+    name: "{{ item.source }}"
+    state: directory
+    owner: "{{ item.source_handling.owner | default(omit) }}"
+    group: "{{ item.source_handling.group | default(omit) }}"
+    mode: "{{ item.source_handling.mode | default(omit) }}"
+  loop: "{{ container_mounts }}"
+  loop_control:
+    label: "{{ item.source }} /
+      owner: {{ item.source_handling.owner | default('-') }}
+      group: {{ item.source_handling.group | default('-') }}
+      mode: {{ item.source_handling.mode   | default('-') }}"
 
 # - name: remove environnments from container
 #   set_fact:

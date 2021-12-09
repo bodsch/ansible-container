@@ -22,12 +22,36 @@ container:
     volumes:
       - /run/docker.sock:/tmp/docker.sock:ro
       - /tmp/nginx:/tmp/nginx:ro
-      - /dev/foo:/dev/foo:ro
-      - /tmp/testing1:/var/tmp/testing1|{owner="1000",group="1000",mode="0755"}
+      # - /dev/foo:/dev/foo:ro
+      # - /tmp/testing1:/var/tmp/testing1|{owner="1000",group="1000",mode="0755"}
       - /tmp/testing2:/var/tmp/testing2|{owner="800",group="999",mode="0700"}
       - /tmp/testing3:/var/tmp/testing3:rw|{owner="999",group="1000"}
       - /tmp/testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
       - /tmp/testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
+    mounts:
+      - source: /dev/foo
+        target: /dev/foo
+        read_only: true
+        source_handling:
+          create: false
+          # owner: "1000"
+          # group: "1000"
+          # mode: "0750"
+      - source: /tmp/testing1
+        target: /var/tmp/testing1
+        source_handling:
+          create: true
+          owner: "1000"
+          group: "1000"
+          mode: "0750"
+      - source: /tmp/testing2
+        target: /var/tmp/testing2
+        source_handling:
+          create: true
+          owner: "800"
+          group: "999"
+          mode: "0700"
+
 
   - name: whoami
     # state: absent

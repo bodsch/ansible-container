@@ -24,8 +24,10 @@ class FilterModule(object):
             'container_names': self.filter_names,
             'container_images': self.filter_images,
             'container_volumes': self.filter_volumes,
+            'container_mounts': self.filter_mounts,
             'remove_values': self.remove_values,
             'remove_custom_fields': self.remove_custom_fields,
+            'remove_source_handling': self.remove_source_handling,
             'changed': self.filter_changed,
             'properties_changed': self.filter_properties_changed,
             'update': self.filter_update,
@@ -273,9 +275,28 @@ class FilterModule(object):
 
         return result
 
+    def filter_mounts(self, data):
+        """
+          return mounts
+        """
+        result = []
+        mounts = self._get_keys_from_dict(data, 'mounts')
+        merged = list(itertools.chain(*mounts))
+
+        # remove all entries with
+        # "source_handling": {
+        #   "create": false
+        # }
+        for item in merged:
+            if item.get('source_handling', {}) and item.get('source_handling', {}).get('create'):
+                result.append(item)
+
+        display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
+
+        return result
+
     def remove_custom_fields(self, data):
         """
-
         """
         result = []
 
@@ -286,6 +307,17 @@ class FilterModule(object):
             result = data
 
         return result
+
+    def remove_source_handling(self, data):
+        """
+        """
+        # display.v(f"remove_source_handling({data})")
+        if(isinstance(data, list)):
+            data = self._del_keys_from_dict(data, 'source_handling')
+
+        # display.v("return : {}".format(data))
+
+        return data
 
     def files_available(self, data):
         """
