@@ -1,5 +1,7 @@
 ---
 
+container_reporting_changes: true
+
 container_env_directory: /opt/container
 
 container_registry:

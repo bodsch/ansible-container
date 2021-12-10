@@ -32,6 +32,7 @@ class FilterModule(object):
             'properties_changed': self.filter_properties_changed,
             'update': self.filter_update,
             'files_available': self.files_available,
+            'reporting': self.reporting
         }
 
     def filter_hashes(self, mydict):
@@ -298,6 +299,7 @@ class FilterModule(object):
     def remove_custom_fields(self, data):
         """
         """
+        display.v(f"remove_custom_fields({data})")
         result = []
 
         if isinstance(data, list):
@@ -306,16 +308,18 @@ class FilterModule(object):
         else:
             result = data
 
+        display.v("return : {}".format(result))
+
         return result
 
     def remove_source_handling(self, data):
         """
         """
-        # display.v(f"remove_source_handling({data})")
+        display.v(f"remove_source_handling({data})")
         if(isinstance(data, list)):
             data = self._del_keys_from_dict(data, 'source_handling')
 
-        # display.v("return : {}".format(data))
+        display.v("return : {}".format(data))
 
         return data
 
@@ -336,6 +340,28 @@ class FilterModule(object):
         display.v("return : {}".format(result))
 
         return result
+
+    def reporting(self, data):
+        """
+        """
+        result = []
+
+        # display.v(f"reporting({data}) - ({type(data)})")
+        # display.v("     {}".format(json.dumps(data, indent=2, sort_keys=True)))
+
+        if(isinstance(data, list)):
+
+            for item in data:
+                # display.v("     {}".format(type(item)))
+                # display.v("     {}".format(json.dumps(item, indent=2, sort_keys=True)))
+                data = item.get('item', {}).get('image', None)
+                # display.v("     {}".format(data))
+                result.append(data)
+
+        display.v("return : {}".format(result))
+
+        return result
+
 
     def _get_keys_from_dict(self, dictionary, key):
         """

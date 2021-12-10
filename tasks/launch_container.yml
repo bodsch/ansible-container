@@ -33,7 +33,7 @@
     memory_reservation: "{{ item.memory_reservation | default(omit) }}"
     memory_swap: "{{ item.memory_swap | default(omit) }}"
     memory_swappiness: "{{ item.memory_swappiness | default(omit) }}"
-    mounts: "{{ item.mounts | default(omit) }}"
+    mounts: "{{ item.mounts | default([]) | remove_source_handling }}"
     network_mode: "{{ item.network_mode | default('bridge') }}"
     # ansible 2.10
     # container_default_behavior: "compatibility"
@@ -88,7 +88,7 @@
     memory_reservation: "{{ item.memory_reservation | default(omit) }}"
     memory_swap: "{{ item.memory_swap | default(omit) }}"
     memory_swappiness: "{{ item.memory_swappiness | default(omit) }}"
-    mounts: "{{ item.mounts | default(omit) | remove_source_handling  }}"
+    mounts: "{{ item.mounts | default([]) | remove_source_handling }}"
     network_mode: "{{ item.network_mode | default('bridge') }}"
     networks: "{{ item.networks | default(omit) }}"
     networks_cli_compatible: true
@@ -107,8 +107,10 @@
     label: "{{ item.name }} - hostname: {{ item.name }} - image: {{ item.image }}"
   when: "ansible_version.full is version_compare('2.10', '>=')"
 
-- name: debug
+- name: reporting changes
   debug:
-    msg: "{{ create_container_instances }}"
+    msg: "{{ create_container_instances.results | selectattr('changed', 'equalto', True) | reporting }}"
+  when:
+    - container_reporting_changes
 
 ...
