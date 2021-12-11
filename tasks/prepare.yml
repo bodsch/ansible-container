@@ -105,7 +105,7 @@
   when:
     - item.properties is defined
 
-- name: container restart needed after property changes  # noqa no-handler
+- name: Is a container restart necessary after changes to the protieries?  # noqa no-handler
   set_fact:
     container_update_needed: true
     container_changed: "{{ changed_application_properties | properties_changed }}"

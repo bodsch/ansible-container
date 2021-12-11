@@ -57,14 +57,12 @@ class FilterModule(object):
 
                 if(cont):
                     name = cont.get('Name').strip("/")
-                    display.vv("found: {}".format(name))
-
+                    # display.vv("found: {}".format(name))
                     image         = cont.get('Config').get('Image')
                     created       = cont.get('Created')
                 elif(item):
                     name = item.get('name')
-                    display.vv("found: {}".format(name))
-
+                    # display.vv("found: {}".format(name))
                     image         = item.get('image')
                     created       = "None"
                 else:
@@ -83,11 +81,12 @@ class FilterModule(object):
                 "created": created,
             }
 
-        display.v("return : {}".format(seen))
-
+        # display.v("return : {}".format(seen))
         return seen
 
     def filter_compare_dict(self, left_dict, right_dict):
+        """
+        """
         result = {}
 
         if(isinstance(left_dict, list)):
@@ -125,8 +124,7 @@ class FilterModule(object):
                 if(left != right):
                     result[k] = l_dict
 
-        display.v("return : {}".format(result))
-
+        # display.v("return : {}".format(result))
         return result
 
     def filter_names(self, data):
@@ -178,7 +176,7 @@ class FilterModule(object):
                 if changed:
                     result.append(item)
 
-        display.v("  = result {}".format(result))
+        # display.v("  = result {}".format(result))
 
         return result
 
@@ -186,8 +184,7 @@ class FilterModule(object):
         """
           add recreate to changed container entry
         """
-        display.v("filter_update(data, {})".format(update))
-
+        # display.v("filter_update(data, {})".format(update))
         for change in update:
             for d in data:
                 if d.get('image') == change or d.get('name') == change:
@@ -272,7 +269,7 @@ class FilterModule(object):
 
                 result.append(res)
 
-        display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
+        # display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
 
         return result
 
@@ -292,7 +289,7 @@ class FilterModule(object):
             if item.get('source_handling', {}) and item.get('source_handling', {}).get('create'):
                 result.append(item)
 
-        display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
+        # display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
 
         return result
 
@@ -315,11 +312,11 @@ class FilterModule(object):
     def remove_source_handling(self, data):
         """
         """
-        display.v(f"remove_source_handling({data})")
+        # display.v(f"remove_source_handling({data})")
         if(isinstance(data, list)):
             data = self._del_keys_from_dict(data, 'source_handling')
 
-        display.v("return : {}".format(data))
+        # display.v("return : {}".format(data))
 
         return data
 
@@ -328,16 +325,9 @@ class FilterModule(object):
         """
         result = []
 
-        # display.v(f"found: {data} ({type(data)})")
-
         for k in data:
-            # display.v(f"  - {k} ({type(k)})")
-            # display.v(json.dumps(k, indent=4, sort_keys=True) )
-
             if k.get('stat', {}).get('exists', False):
                 result.append(k.get('item'))
-
-        display.v("return : {}".format(result))
 
         return result
 
@@ -346,22 +336,23 @@ class FilterModule(object):
         """
         result = []
 
-        # display.v(f"reporting({data}) - ({type(data)})")
-        # display.v("     {}".format(json.dumps(data, indent=2, sort_keys=True)))
-
         if(isinstance(data, list)):
-
             for item in data:
-                # display.v("     {}".format(type(item)))
-                # display.v("     {}".format(json.dumps(item, indent=2, sort_keys=True)))
-                data = item.get('item', {}).get('image', None)
-                # display.v("     {}".format(data))
-                result.append(data)
+                data = item.get('item', {})
+                name = data.get('name', None)
+                hostname = data.get('hostname', None)
+                image = data.get('image', None)
+
+                if hostname is not None:
+                    result.append(hostname)
+                elif name is not None:
+                    result.append(name)
+                else:
+                    result.append(image)
 
         display.v("return : {}".format(result))
 
         return result
-
 
     def _get_keys_from_dict(self, dictionary, key):
         """
