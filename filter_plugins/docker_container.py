@@ -24,12 +24,15 @@ class FilterModule(object):
             'container_names': self.filter_names,
             'container_images': self.filter_images,
             'container_volumes': self.filter_volumes,
+            'container_mounts': self.filter_mounts,
             'remove_values': self.remove_values,
             'remove_custom_fields': self.remove_custom_fields,
+            'remove_source_handling': self.remove_source_handling,
             'changed': self.filter_changed,
             'properties_changed': self.filter_properties_changed,
             'update': self.filter_update,
             'files_available': self.files_available,
+            'reporting': self.reporting
         }
 
     def filter_hashes(self, mydict):
@@ -54,14 +57,12 @@ class FilterModule(object):
 
                 if(cont):
                     name = cont.get('Name').strip("/")
-                    display.vv("found: {}".format(name))
-
+                    # display.vv("found: {}".format(name))
                     image         = cont.get('Config').get('Image')
                     created       = cont.get('Created')
                 elif(item):
                     name = item.get('name')
-                    display.vv("found: {}".format(name))
-
+                    # display.vv("found: {}".format(name))
                     image         = item.get('image')
                     created       = "None"
                 else:
@@ -80,11 +81,12 @@ class FilterModule(object):
                 "created": created,
             }
 
-        display.v("return : {}".format(seen))
-
+        # display.v("return : {}".format(seen))
         return seen
 
     def filter_compare_dict(self, left_dict, right_dict):
+        """
+        """
         result = {}
 
         if(isinstance(left_dict, list)):
@@ -122,8 +124,7 @@ class FilterModule(object):
                 if(left != right):
                     result[k] = l_dict
 
-        display.v("return : {}".format(result))
-
+        # display.v("return : {}".format(result))
         return result
 
     def filter_names(self, data):
@@ -175,7 +176,7 @@ class FilterModule(object):
                 if changed:
                     result.append(item)
 
-        display.v("  = result {}".format(result))
+        # display.v("  = result {}".format(result))
 
         return result
 
@@ -183,8 +184,7 @@ class FilterModule(object):
         """
           add recreate to changed container entry
         """
-        display.v("filter_update(data, {})".format(update))
-
+        # display.v("filter_update(data, {})".format(update))
         for change in update:
             for d in data:
                 if d.get('image') == change or d.get('name') == change:
@@ -269,14 +269,34 @@ class FilterModule(object):
 
                 result.append(res)
 
-        display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
+        # display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
+
+        return result
+
+    def filter_mounts(self, data):
+        """
+          return mounts
+        """
+        result = []
+        mounts = self._get_keys_from_dict(data, 'mounts')
+        merged = list(itertools.chain(*mounts))
+
+        # remove all entries with
+        # "source_handling": {
+        #   "create": false
+        # }
+        for item in merged:
+            if item.get('source_handling', {}) and item.get('source_handling', {}).get('create'):
+                result.append(item)
+
+        # display.v("return : {}".format(json.dumps(result, indent=4, sort_keys=True)))
 
         return result
 
     def remove_custom_fields(self, data):
         """
-
         """
+        display.v(f"remove_custom_fields({data})")
         result = []
 
         if isinstance(data, list):
@@ -285,21 +305,50 @@ class FilterModule(object):
         else:
             result = data
 
+        display.v("return : {}".format(result))
+
         return result
+
+    def remove_source_handling(self, data):
+        """
+        """
+        # display.v(f"remove_source_handling({data})")
+        if(isinstance(data, list)):
+            data = self._del_keys_from_dict(data, 'source_handling')
+
+        # display.v("return : {}".format(data))
+
+        return data
 
     def files_available(self, data):
         """
         """
         result = []
 
-        # display.v(f"found: {data} ({type(data)})")
-
         for k in data:
-            # display.v(f"  - {k} ({type(k)})")
-            # display.v(json.dumps(k, indent=4, sort_keys=True) )
-
             if k.get('stat', {}).get('exists', False):
                 result.append(k.get('item'))
+
+        return result
+
+    def reporting(self, data):
+        """
+        """
+        result = []
+
+        if(isinstance(data, list)):
+            for item in data:
+                data = item.get('item', {})
+                name = data.get('name', None)
+                hostname = data.get('hostname', None)
+                image = data.get('image', None)
+
+                if hostname is not None:
+                    result.append(hostname)
+                elif name is not None:
+                    result.append(name)
+                else:
+                    result.append(image)
 
         display.v("return : {}".format(result))
 

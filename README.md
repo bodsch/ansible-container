@@ -93,13 +93,16 @@ E.g. under `/opt/container/${CONTAINER_NAME}/${CONTAINER_NAME}.properties`
 
 ## custom fileds for volumes
 
-The idea behind the cutom_fields is to define corresponding rights in addition to the optional creation of the directories.
+The idea behind the cutom_fields is to define corresponding rights in addition to the optional 
+creation of the directories.
 
 **For example:**
 
-One can persist the data directory in the host system for a solr container and also assign the correct rights to this directory.
+One can persist the data directory in the host system for a solr container and also assign the 
+correct rights to this directory.
 
-However, since it is also possible to mount files or sockets in the container via volumes, it is possible here to prevent the creation of a directory using `ignore`.
+However, since it is also possible to mount files or sockets in the container via volumes, it is 
+possible here to prevent the creation of a directory using `ignore`.
 
 The following variables can be used:
 
@@ -116,13 +119,43 @@ The following variables can be used:
       - /run/docker.sock:/run/docker.sock:ro
       - /tmp/nginx:/tmp/nginx:ro
       - /dev/foo:/dev/foo:ro
-      - testing1:/var/tmp/testing1|{owner="1000",group="1000",mode="0755"}
-      - testing2:/var/tmp/testing2|{owner="800",group="999",mode="0700"}
       - testing3:/var/tmp/testing3:rw|{owner="999",group="1000"}
       - testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
-      - testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
 ```
 
+## custom fields for mounts
+
+The `mounts` are similar to the `volumes`.
+Here, too, it is possible to create persistent directories in the host system via an extension.
+
+
+With `create`, you can control whether the source directory should be created or not.
+The specification of `owner` and `group` enables the setting of access rights.
+
+
+```yaml
+
+    mounts:
+      - source: /tmp/testing1
+        target: /var/tmp/testing1
+        type: bind
+        source_handling:
+          create: true
+          owner: "1000"
+          group: "1000"
+          mode: "0750"
+      - source: /tmp/testing2
+        target: /var/tmp/testing2
+        type: bind
+        source_handling:
+          create: true
+          owner: "800"
+          group: "999"
+          mode: "0700"
+      - source: /tmp/testing5
+        target: /var/tmp/testing5
+        type: bind 
+```
 
 ## tests
 

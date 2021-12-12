@@ -18,19 +18,33 @@ container:
     hostname: nginx-proxy
     image: jwilder/nginx-proxy:0.9.3-alpine
     published_ports:
-      - 80:80
+      - 8080:80
     volumes:
       - /run/docker.sock:/tmp/docker.sock:ro
       - /tmp/nginx:/tmp/nginx:ro
       - /dev/foo:/dev/foo:ro
-      - /tmp/testing1:/var/tmp/testing1|{owner="1000",group="1000",mode="0755"}
-      - /tmp/testing2:/var/tmp/testing2|{owner="800",group="999",mode="0700"}
       - /tmp/testing3:/var/tmp/testing3:rw|{owner="999",group="1000"}
       - /tmp/testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
       - /tmp/testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
+    mounts:
+      - source: /tmp/testing1
+        target: /var/tmp/testing1
+        type: bind
+        source_handling:
+          create: true
+          owner: "1000"
+          group: "1000"
+          mode: "0750"
+      - source: /tmp/testing2
+        target: /var/tmp/testing2
+        type: bind
+        source_handling:
+          create: true
+          owner: "800"
+          group: "999"
+          mode: "0700"
 
   - name: whoami
-    # state: absent
     image: jwilder/whoami
     environments:
       VIRTUAL_HOST: whoami.local
@@ -39,19 +53,20 @@ container:
     hostname: hello-world
     image: hello-world:latest
     properties:
-      #
       publisher.maxRecursionDepth: 600
       # user and password for login to the staging serve
       replicator.user: 'replicator'
       replicator.password: 'replicator'
       # replicator.domain: ''
       replicator.tmp_dir: 'var/tmp'
+    environments:
+      VIRTUAL_HOST: hello-world.local
 
 container_pre_tasks:
   - /usr/local/bin/list_all_images.sh
-  - /usr/local/bin/parse_container_fact.sh
 
 container_post_tasks:
   - /usr/local/bin/remove_untagged_images.sh
+  - /usr/local/bin/parse_container_fact.sh
 
 ...
