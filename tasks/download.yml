@@ -54,6 +54,7 @@
 - name: save changed containers
   block:
     - name: create custom fact file
+      become: true
       template:
         src: facts.d/update_container.fact.j2
         dest: /etc/ansible/facts.d/update_container.fact

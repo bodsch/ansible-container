@@ -31,6 +31,7 @@
     - container_post_tasks | count > 0
 
 - name: remove update fact
+  become: true
   file:
     path: /etc/ansible/facts.d/update_container.fact
     state: absent
