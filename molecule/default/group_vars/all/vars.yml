@@ -26,6 +26,7 @@ container:
       - /tmp/testing3:/var/tmp/testing3:rw|{owner="999",group="1000"}
       - /tmp/testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
       - /tmp/testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
+      - /tmp/testing6:/var/tmp/testing6:ro|{owner="999",group="1000"}
     mounts:
       - source: /tmp/testing1
         target: /var/tmp/testing1
