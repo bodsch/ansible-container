@@ -6,16 +6,19 @@
 
 from __future__ import absolute_import, division, print_function
 import os
-import json
+# import json
 import pwd
 import grp
+
 from ruamel.yaml import YAML
 
 from ansible.module_utils.basic import AnsibleModule
 
+
 class ContainerDirectories(object):
     """
     """
+
     def __init__(self, module):
         """
         """
@@ -42,8 +45,8 @@ class ContainerDirectories(object):
         )
 
         self.read_only = {
-          'rw': False,
-          'ro': True
+            'rw': False,
+            'ro': True
         }
 
         # _, _, self.uid, gid, _, _, _ = pwd.getpwnam(self.owner)
@@ -78,51 +81,22 @@ class ContainerDirectories(object):
 
         migrated_volumes = self.__migrate_volumes(all_volumes)
 
-        # self.module.log("mounts   : {}".format(
-        #     all_mounts
-        # ))
-        # self.module.log("migrated : {}".format(
-        #     migrated_volumes
-        # ))
-
         full_list = migrated_volumes + all_mounts
 
-        # self.module.log("{}".format(
-        #     json.dumps(full_list, indent=4)
-        # ))
+        current_state = self.__analyse_directories(full_list)
+        self.__create_directories(full_list, current_state)
 
-        self.__create_directories(full_list)
+        final_state = self.__analyse_directories(full_list)
 
+        self.module.log("{}".format(current_state))
+        self.module.log("{}".format(final_state))
 
-        # # self.module.log("type: {} | {}".format(
-        # #     type(self.data),
-        # #     self.data
-        # # ))
-        #
-        # for d in self.data:
-        #     # self.module.log("{} | {}".format(type(d), d))
-        #
-        #     _n = d.get('name')
-        #     _v = d.get('volumes', [])
-        #     _m = d.get('mounts', [])
-        #
-        #     self.module.log("name: {}".format(_n))
-        #     self.module.log("v   : {} | {} | {}".format(type(_v), len(_v), _v) )
-        #     self.module.log("m   : {} | {} | {}".format(type(_m), len(_m), _m))
-        #
-        #     if len(_v.count) > 0:
-        #         all_volumes.append(_v)
-        #
-        #     if len(_m.count) > 0:
-        #         all_mounts.append(_m)
-        #
-        # self.module.log("volumes: {}".format(
-        #     all_volumes
-        # ))
-        # self.module.log("mounts : {}".format(
-        #     all_mounts
-        # ))
+        equal_lists = self.__compare_two_lists(list1=current_state, list2=final_state)
 
+        self.module.log("{}".format(equal_lists))
+
+        result['changed'] = not equal_lists
+        result['failed'] = False
 
         return result
 
@@ -133,20 +107,9 @@ class ContainerDirectories(object):
         all_volumes = []
 
         for d in self.data:
-            #_n = d.get('name')
             _v = d.get('volumes', [])
-
-            #self.module.log("name: {}".format(_n))
-            #self.module.log("v   : {} | {} | {}".format(type(_v), len(_v), _v) )
-
             if len(_v) > 0:
                 all_volumes.append(_v)
-
-        self.module.log("volumes: {}".format(
-            all_volumes
-        ))
-
-        self.module.log("return: {}".format(all_volumes))
 
         return all_volumes
 
@@ -157,20 +120,9 @@ class ContainerDirectories(object):
         all_mounts = []
 
         for d in self.data:
-            #_n = d.get('name')
             _m = d.get('mounts', [])
-
-            #self.module.log("name: {}".format(_n))
-            #self.module.log("m   : {} | {} | {}".format(type(_m), len(_m), _m))
-
             if len(_m) > 0:
                 all_mounts = _m
-
-        self.module.log("mounts : {}".format(
-            all_mounts
-        ))
-
-        self.module.log("return: {}".format(all_mounts))
 
         return all_mounts
 
@@ -186,8 +138,6 @@ class ContainerDirectories(object):
             """
               returns only custom fileds as json
             """
-            #self.module.log("- custom_fields({})".format(d))
-
             d = d.replace('=', ': ')
 
             if d.startswith("[") and d.endswith("]"):
@@ -200,13 +150,10 @@ class ContainerDirectories(object):
             code = yaml.load(d)
 
             for key, value in code.items():
-                #self.module.log("  - {} : {}".format(key, value))
                 # transform ignore=True into create=False
                 if key == "ignore":
                     code.insert(0, 'create', not value)
                     del code[key]
-
-            # self.module.log("return: {}".format(code))
 
             return dict(code)
 
@@ -230,10 +177,9 @@ class ContainerDirectories(object):
         #
 
         for d in volumes:
-            # self.module.log("{} | {}".format(type(d), d))
             for entry in d:
-                # self.module.log("{} | {}".format(type(entry), entry))
-
+                """
+                """
                 read_mode = None
                 c_fields = dict()
                 values = entry.split('|')
@@ -244,7 +190,6 @@ class ContainerDirectories(object):
 
                 values = entry.split(':')
                 count = len(values)
-                # self.module.log("{} | {}".format(count, values))
 
                 local_volume  = values[0]
                 remote_volume = values[1]
@@ -268,80 +213,137 @@ class ContainerDirectories(object):
 
                     result.append(res)
 
-            self.module.log("{} | {}".format(type(result), result))
+        return result
+
+    def __analyse_directories(self, directory_tree):
+        """
+        """
+        self.module.log("- __analyse_directories(directory_tree)")
+        result = []
+
+        # analyse first"
+        for entry in directory_tree:
+            """
+            """
+            res = {}
+
+            source = entry.get('source')
+            current_owner = None
+            current_group = None
+            current_mode  = None
+
+            res[source] = {}
+
+            if os.path.isdir(source):
+                _state = os.stat(source)
+                try:
+                    current_owner  = pwd.getpwuid(_state.st_uid).pw_uid
+                except KeyError:
+                    pass
+                try:
+                    current_group = grp.getgrgid(_state.st_gid).gr_gid
+                except KeyError:
+                    pass
+                try:
+                    current_mode  = oct(_state.st_mode)[-3:]
+                except KeyError:
+                    pass
+
+            res[source]['owner'] = current_owner
+            res[source]['group'] = current_group
+            res[source]['mode']  = current_mode
+
+            result.append(res)
 
         return result
 
-
-    def __create_directories(self, directory_tree):
+    def __create_directories(self, directory_tree, current_state):
         """
         """
-        self.module.log("  {}".format(directory_tree))
+        self.module.log("- __create_directories(directory_tree, current_state)")
 
         for entry in directory_tree:
-            self.module.log(" - {}".format(entry))
-
+            """
+            """
             source = entry.get('source')
             source_handling = entry.get('source_handling', {})
-            force_create = entry.get('source_handling', {}).get('create', None)
+            force_create = source_handling.get('create', None)
+            force_owner  = source_handling.get('owner', None)
+            force_group  = source_handling.get('group', None)
+            force_mode   = source_handling.get('mode', None)
 
-            force_owner = entry.get('source_handling', {}).get('owner', None)
-            force_group = entry.get('source_handling', {}).get('group', None)
-            force_mode  = entry.get('source_handling', {}).get('mode' , None)
-            # self.module.log("   - {}".format(force_create))
+            curr = self.__find_in_list(current_state, source)
 
-            self.module.log(" -> {}".format(source))
+            current_owner = curr[source].get('owner')
+            current_group = curr[source].get('group')
+
+            # create directory
             if force_create is not None and not force_create:
-                self.module.log("   ignore")
-                # continue
                 pass
             else:
-                self.module.log("   create")
                 try:
                     os.makedirs(source, exist_ok=True)
                 except FileExistsError:
                     pass
 
+            # change mode
+            if os.path.isdir(source) and force_mode is not None:
+                os.chmod(source, int(force_mode, base=8))
+
+            # change ownership
             if force_owner is not None or force_group is not None:
-                self.module.log("   - {} : {}".format(force_owner, force_group))
+                """
+                """
+                if os.path.isdir(source):
+                    """
+                    """
+                    if force_owner is not None:
+                        try:
+                            force_owner = pwd.getpwnam(force_owner).pw_uid
+                        except KeyError:
+                            force_owner = int(force_owner)
+                            pass
+                    elif current_owner is not None:
+                        force_owner = current_owner
+                    else:
+                        force_owner = 0
 
-                if force_owner is not None:
-                    try:
-                        u = pwd.getpwnam(force_owner).pw_uid
-                    except KeyError:
-                        u = int(force_owner)
+                    if force_group is not None:
+                        try:
+                            force_group = grp.getgrnam(force_group).gr_gid
+                        except KeyError:
+                            force_group = int(force_group)
+                            pass
+                    elif current_group is not None:
+                        force_group = current_group
+                    else:
+                        force_group = 0
 
-                    self.module.log("   uid: {}".format(u))
+                    os.chown(source, int(force_owner), int(force_group))
 
-                if force_group is not None:
-                    try:
-                        g = grp.getgrnam(force_group).gr_gid
-                    except KeyError:
-                        g = int(force_group)
+    def __find_in_list(self, list, value):
+        """
+        """
+        for entry in list:
+            for k, v in entry.items():
+                if k == value:
+                    return entry
 
-                    self.module.log("   gid: {}".format(g))
+        return None
 
-                # os.chown(source, int(force_owner), int(force_group))
-
-                if(force_mode is not None):
-                    os.chmod(
-                        source, int(force_mode, base=8)
-                    )
-
-        # for path in directory_tree:
-        #     try:
-        #         os.makedirs(path, exist_ok=True)
-        #     except FileExistsError:
-        #         pass
-        #
-        # if(self.uid and self.gid):
-        #     for root, dirs, files in os.walk("/{}".format(self.base_directory.split('/')[1])):
-        #         for d in dirs:
-        #             os.chown(os.path.join(root, d), self.uid, self.gid)
-        #             if(self.mode):
-        #                 os.chmod(
-        #                     os.path.join(root, d),
-        #                     int(self.mode, base=8))
+    def __compare_two_lists(self, list1: list, list2: list) -> bool:
+        """
+        Compare two lists and logs the difference.
+        :param list1: first list.
+        :param list2: second list.
+        :return:      if there is difference between both lists.
+        """
+        diff = [i for i in list1 + list2 if i not in list1 or i not in list2]
+        result = len(diff) == 0
+        if not result:
+            self.module.log("There are {0} differences:".format(len(diff)))
+            self.module.log("  {0}".format(diff[:5]))
+        return result
 
 
 # ===========================================
