@@ -18,6 +18,44 @@
         - default.yaml
       skip: true
 
+- block:
+    - name: make sure python3-apt is installed (only debian based)
+      package:
+        name:
+          - python3-apt
+        state: present
+      register: _installed
+
+    - name: clean apt cache
+      command: apt-get clean
+      args:
+        warn: false
+      when:
+        - _installed.changed
+  when:
+    - ansible_os_family | lower == 'debian'
+
+- name: python support
+  block:
+    - name: create requirements.txt
+      template:
+        src: requirements.txt.j2
+        dest: /tmp/container-requirements.txt
+        mode: 0660
+
+    - name: ensure python dependecies for container are installed
+      pip:
+        requirements: /tmp/container-requirements.txt
+        state: present
+        executable: pip{{ '3' if ansible_python.version.major | int == 3 else '' }}
+      register: pip_install
+      # ignore_errors: true
+      # no_log: true
+
+  when:
+    - container_python_packages is defined
+    - container_python_packages | count > 0
+
 - name: install dependency
   package:
     name: "{{ container_packages }}"
@@ -117,6 +155,20 @@
     container: "{{ container | update(container_changed) }}"
   when:
     - container_update_needed
+
+- name: create container volumes and mountpoints
+  become: true
+  container_mounts:
+    data: "{{ container }}"
+    volumes: true
+    mounts: true
+  register: _created_directories
+
+- name: result
+  debug:
+    msg: "{{ _created_directories }}"
+  when:
+    - _created_directories.changed
 
 - name: create container volumes
   become: true

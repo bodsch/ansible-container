@@ -2,6 +2,10 @@
 
 container_packages: []
 
+container_python_packages:
+  - name: ruamel.yaml
+    version: 0.17
+
 container_update_needed: false
 
 container_registry_default:
