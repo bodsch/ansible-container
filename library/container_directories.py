@@ -6,11 +6,8 @@
 
 from __future__ import absolute_import, division, print_function
 import os
-# import json
 import pwd
 import grp
-
-# from ruamel.yaml import YAML
 
 from ansible.module_utils.basic import AnsibleModule
 
