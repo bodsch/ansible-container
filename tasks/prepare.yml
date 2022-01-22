@@ -74,13 +74,13 @@
   set_fact:
     container_images: "{{ container | container_images }}"
 
-- name: detect container volumes
-  set_fact:
-    container_volumes: "{{ container | container_volumes }}"
-
-- name: detect container mountpoints
-  set_fact:
-    container_mounts: "{{ container | container_mounts }}"
+# - name: detect container volumes
+#   set_fact:
+#     container_volumes: "{{ container | container_volumes }}"
+#
+# - name: detect container mountpoints
+#   set_fact:
+#     container_mounts: "{{ container | container_mounts }}"
 
 - name: validate container mountpoints
   fail:
@@ -111,16 +111,33 @@
 
 - name: create application directory to persist docker environnments
   become: true
-  file:
-    name: "{{ container_env_directory }}/{{ item }}"
-    state: directory
+  container_directories:
+    base_directory: "{{ container_env_directory }}"
+    container: "{{ container_names }}"
     owner: '1000'
     group: '1000'
-    mode: 0o775
-  with_items: "{{ container_names }}"
-  loop_control:
-    label: "{{ item }}"
+    mode: "0775"
+  register: _created_directories
 
+- name: result
+  debug:
+    msg: "{{ _created_directories }}"
+  when:
+    - _created_directories.changed
+
+
+# - name: create application directory to persist docker environnments
+#   become: true
+#   file:
+#     name: "{{ container_env_directory }}/{{ item }}"
+#     state: directory
+#     owner: '1000'
+#     group: '1000'
+#     mode: 0o775
+#   with_items: "{{ container_names }}"
+#   loop_control:
+#     label: "{{ item }}"
+#
 - name: persist application docker environnments
   become: true
   template:
@@ -170,38 +187,38 @@
   when:
     - _created_directories.changed
 
-- name: create container volumes
-  become: true
-  file:
-    name: "{{ item.local }}"
-    state: directory
-    owner: "{{ item.ansible.owner | default(omit) }}"
-    group: "{{ item.ansible.group | default(omit) }}"
-    mode: "{{ item.ansible.mode | default(omit) }}"
-  loop: "{{ container_volumes }}"
-  loop_control:
-    label: "{{ item.local }} /
-      ignore: {{ item.ansible.ignore | default('false') | bool }}
-      owner: {{ item.ansible.owner | default('-') }}
-      group: {{ item.ansible.group | default('-') }}
-      mode: {{ item.ansible.mode   | default('-') }}"
-  when:
-    - not item.ansible.ignore | default('false') | bool
-
-- name: create container mountpoints
-  become: true
-  file:
-    name: "{{ item.source }}"
-    state: directory
-    owner: "{{ item.source_handling.owner | default(omit) }}"
-    group: "{{ item.source_handling.group | default(omit) }}"
-    mode: "{{ item.source_handling.mode | default(omit) }}"
-  loop: "{{ container_mounts }}"
-  loop_control:
-    label: "{{ item.source }} /
-      owner: {{ item.source_handling.owner | default('-') }}
-      group: {{ item.source_handling.group | default('-') }}
-      mode: {{ item.source_handling.mode   | default('-') }}"
+# - name: create container volumes
+#   become: true
+#   file:
+#     name: "{{ item.local }}"
+#     state: directory
+#     owner: "{{ item.ansible.owner | default(omit) }}"
+#     group: "{{ item.ansible.group | default(omit) }}"
+#     mode: "{{ item.ansible.mode | default(omit) }}"
+#   loop: "{{ container_volumes }}"
+#   loop_control:
+#     label: "{{ item.local }} /
+#       ignore: {{ item.ansible.ignore | default('false') | bool }}
+#       owner: {{ item.ansible.owner | default('-') }}
+#       group: {{ item.ansible.group | default('-') }}
+#       mode: {{ item.ansible.mode   | default('-') }}"
+#   when:
+#     - not item.ansible.ignore | default('false') | bool
+#
+# - name: create container mountpoints
+#   become: true
+#   file:
+#     name: "{{ item.source }}"
+#     state: directory
+#     owner: "{{ item.source_handling.owner | default(omit) }}"
+#     group: "{{ item.source_handling.group | default(omit) }}"
+#     mode: "{{ item.source_handling.mode | default(omit) }}"
+#   loop: "{{ container_mounts }}"
+#   loop_control:
+#     label: "{{ item.source }} /
+#       owner: {{ item.source_handling.owner | default('-') }}
+#       group: {{ item.source_handling.group | default('-') }}
+#       mode: {{ item.source_handling.mode   | default('-') }}"
 
 # - name: remove environnments from container
 #   set_fact:

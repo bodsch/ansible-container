@@ -15,7 +15,7 @@ from ruamel.yaml import YAML
 from ansible.module_utils.basic import AnsibleModule
 
 
-class ContainerDirectories(object):
+class ContainerMounts(object):
     """
     """
     def __init__(self, module):
@@ -400,7 +400,7 @@ def main():
         supports_check_mode=True,
     )
 
-    p = ContainerDirectories(module)
+    p = ContainerMounts(module)
     result = p.run()
 
     module.log(msg="= result: {}".format(result))
