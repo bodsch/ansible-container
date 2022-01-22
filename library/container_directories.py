@@ -60,12 +60,16 @@ class ContainerDirectories(object):
                 )
                 post = self.__analyse_directory(d)
 
-                self.module.log(" - {}".format(pre))
-                self.module.log(" - {}".format(post))
+                # self.module.log(" - {}".format(pre))
+                # self.module.log(" - {}".format(post))
 
-                if not changed and not self.__compare_two_lists(pre, post):
-                    changed = True
+                diff = self.__compare_two_lists(pre, post)
+
+                if not diff:
                     created_directories.append(d)
+
+                if not changed and not diff:
+                    changed = True
 
         return dict(
             changed = changed,
