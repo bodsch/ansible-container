@@ -118,13 +118,17 @@
     group: '1000'
     mode: "0775"
   register: _created_directories
+  notify:
+    - created application directories
 
-- name: result
-  debug:
-    msg: "{{ _created_directories }}"
-  when:
-    - _created_directories.changed
+- name: flush handlers
+  meta: flush_handlers
 
+# - name: created directories
+#   debug:
+#     msg: "{{ _created_directories }}"
+#   when:
+#     - _created_directories.changed
 
 # - name: create application directory to persist docker environnments
 #   become: true
@@ -180,12 +184,17 @@
     volumes: true
     mounts: true
   register: _created_directories
+  notify:
+    - created container volumes and mountpoints
 
-- name: result
-  debug:
-    msg: "{{ _created_directories }}"
-  when:
-    - _created_directories.changed
+- name: flush handlers
+  meta: flush_handlers
+
+# - name: result
+#   debug:
+#     msg: "{{ _created_directories }}"
+#   when:
+#     - _created_directories.changed
 
 # - name: create container volumes
 #   become: true

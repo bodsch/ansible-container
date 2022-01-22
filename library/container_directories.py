@@ -10,7 +10,7 @@ import os
 import pwd
 import grp
 
-from ruamel.yaml import YAML
+# from ruamel.yaml import YAML
 
 from ansible.module_utils.basic import AnsibleModule
 
@@ -63,7 +63,7 @@ class ContainerDirectories(object):
                 self.module.log(" - {}".format(pre))
                 self.module.log(" - {}".format(post))
 
-                if changed == False and not self.__compare_two_lists(pre, post):
+                if not changed and not self.__compare_two_lists(pre, post):
                     changed = True
                     created_directories.append(d)
 
@@ -169,13 +169,15 @@ class ContainerDirectories(object):
 # ===========================================
 # Module execution.
 
-def main():
 
+def main():
+    """
+    """
     module = AnsibleModule(
         argument_spec=dict(
             base_directory = dict(
-              required=True,
-              type='str'
+                required=True,
+                type='str'
             ),
             container=dict(
                 required=True,

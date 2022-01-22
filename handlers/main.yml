@@ -1,0 +1,15 @@
+---
+
+- name: created application directories
+  debug:
+    msg: "{{ _created_directories }}"
+  when:
+    - _created_directories.changed
+
+- name: created container volumes and mountpoints
+  debug:
+    msg: "{{ _created_directories }}"
+  when:
+    - _created_directories.changed
+
+...
