@@ -63,8 +63,19 @@ def test_directory(host, get_vars):
 ])
 def test_environments(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))
-    f = host.file("{0}/{1}/container.env".format(dir.linked_to, files))
-    assert f.is_file
+
+    for file in [
+        "{0}/{1}/container.env".format(dir.linked_to, files),
+        "{0}/{1}/.container.env.checksum".format(dir.linked_to, files)
+    ]:
+        f = host.file(file)
+        assert f.is_file
+
+    # f = host.file("{0}/{1}/container.env".format(dir.linked_to, files))
+    # assert f.is_file
+    #
+    # f = host.file("{0}/{1}/container.env".format(dir.linked_to, files))
+    # assert f.is_file
 
 
 @pytest.mark.parametrize("files", [
@@ -72,8 +83,16 @@ def test_environments(host, get_vars, files):
 ])
 def test_properties(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))
-    f = host.file("{0}/{1}/{1}.properties".format(dir.linked_to, files))
-    assert f.is_file
 
-    f = host.file("{0}/{1}/{1}.properties.checksum".format(dir.linked_to, files))
-    assert f.is_file
+        for file in [
+        "{1}.properties".format(dir.linked_to, files),
+        ".{1}.properties.checksum".format(dir.linked_to, files)
+    ]:
+        f = host.file(file)
+        assert f.is_file
+
+    # f = host.file("{0}/{1}/{1}.properties".format(dir.linked_to, files))
+    # assert f.is_file
+    #
+    # f = host.file("{0}/{1}/.{1}.properties.checksum".format(dir.linked_to, files))
+    # assert f.is_file

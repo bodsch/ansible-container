@@ -109,7 +109,7 @@ class ContainerEnvironments(object):
     def _write_environments(self, name, environments = {}):
         """
         """
-        checksum_file = os.path.join(self.base_directory, name, ".container.checksum")
+        checksum_file = os.path.join(self.base_directory, name, ".container.env.checksum")
         data_file     = os.path.join(self.base_directory, name, "container.env")
 
         return self.__write_file(environments, "environments", data_file, checksum_file)
@@ -120,7 +120,7 @@ class ContainerEnvironments(object):
         if len(properties) == 0:
             return False
 
-        checksum_file = os.path.join(self.base_directory, name, ".{}.checksum".format(name))
+        checksum_file = os.path.join(self.base_directory, name, ".{}.properties.checksum".format(name))
         data_file     = os.path.join(self.base_directory, name, "{}.properties".format(name))
 
         return self.__write_file(properties, "properties", data_file, checksum_file)
