@@ -49,6 +49,9 @@ container:
     image: jwilder/whoami
     environments:
       VIRTUAL_HOST: whoami.local
+      # TEST_WORF: true
+      DBA_HOST: database
+      DBA_USER: username
 
   - name: hello-world
     hostname: hello-world

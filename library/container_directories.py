@@ -45,7 +45,7 @@ class ContainerDirectories(object):
         for directory in self.container:
             d = os.path.join(self.base_directory, directory)
 
-            self.module.log("  - {}".format(d))
+            # self.module.log("  - {}".format(d))
 
             if not os.path.isdir(d):
                 pre = self.__analyse_directory(d)
@@ -116,7 +116,7 @@ class ContainerDirectories(object):
     def __create_directory(self, directory, owner = None, group = None, mode = None):
         """
         """
-        self.module.log("- __create_directory({},{},{},{})".format(directory, owner, group, mode))
+        # self.module.log("- __create_directory({},{},{},{})".format(directory, owner, group, mode))
 
         try:
             os.makedirs(directory, exist_ok=True)
@@ -155,16 +155,12 @@ class ContainerDirectories(object):
         :param list2: second list.
         :return:      if there is difference between both lists.
         """
-        # [i for i in list1 + list2 if i not in list1 or i not in list2]
         diff = [x for x in list2 if x not in list1]
 
-        # self.module.log("  {0}".format(diff))
-        # self.module.log("  {0}".format(diff[:5]))
-
         result = len(diff) == 0
-        if not result:
-            self.module.log("There are {0} differences:".format(len(diff)))
-            self.module.log("  {0}".format(diff[:5]))
+        # if not result:
+        #     self.module.log("There are {0} differences:".format(len(diff)))
+        #     self.module.log("  {0}".format(diff[:5]))
         return result
 
 # ===========================================
@@ -201,7 +197,7 @@ def main():
     p = ContainerDirectories(module)
     result = p.run()
 
-    module.log(msg="= result: {}".format(result))
+    # module.log(msg="= result: {}".format(result))
     module.exit_json(**result)
 
 

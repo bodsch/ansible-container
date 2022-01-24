@@ -18,48 +18,48 @@
         - default.yaml
       skip: true
 
-# - block:
-#     - name: make sure python3-apt is installed (only debian based)
-#       package:
-#         name:
-#           - python3-apt
-#         state: present
-#       register: _installed
-#
-#     - name: clean apt cache
-#       command: apt-get clean
-#       args:
-#         warn: false
-#       when:
-#         - _installed.changed
-#   when:
-#     - ansible_os_family | lower == 'debian'
-#
-# - name: python support
-#   block:
-#     - name: create requirements.txt
-#       template:
-#         src: requirements.txt.j2
-#         dest: /tmp/container-requirements.txt
-#         mode: 0660
-#
-#     - name: ensure python dependecies for container are installed
-#       pip:
-#         requirements: /tmp/container-requirements.txt
-#         state: present
-#         executable: pip{{ '3' if ansible_python.version.major | int == 3 else '' }}
-#       register: pip_install
-#       # ignore_errors: true
-#       # no_log: true
-#
-#   when:
-#     - container_python_packages is defined
-#     - container_python_packages | count > 0
-#
-# - name: install dependency
-#   package:
-#     name: "{{ container_packages }}"
-#     state: present
+- block:
+    - name: make sure python3-apt is installed (only debian based)
+      package:
+        name:
+          - python3-apt
+        state: present
+      register: _installed
+
+    - name: clean apt cache
+      command: apt-get clean
+      args:
+        warn: false
+      when:
+        - _installed.changed
+  when:
+    - ansible_os_family | lower == 'debian'
+
+- name: python support
+  block:
+    - name: create requirements.txt
+      template:
+        src: requirements.txt.j2
+        dest: /tmp/container-requirements.txt
+        mode: 0660
+
+    - name: ensure python dependecies for container are installed
+      pip:
+        requirements: /tmp/container-requirements.txt
+        state: present
+        executable: pip{{ '3' if ansible_python.version.major | int == 3 else '' }}
+      register: pip_install
+      # ignore_errors: true
+      # no_log: true
+
+  when:
+    - container_python_packages is defined
+    - container_python_packages | count > 0
+
+- name: install dependency
+  package:
+    name: "{{ container_packages }}"
+    state: present
 
 - name: merge container registry configuration between defaults and custom
   set_fact:
@@ -124,31 +124,26 @@
 - name: flush handlers
   meta: flush_handlers
 
-# - name: created directories
-#   debug:
-#     msg: "{{ _created_directories }}"
-#   when:
-#     - _created_directories.changed
-
-# - name: create application directory to persist docker environnments
-#   become: true
-#   file:
-#     name: "{{ container_env_directory }}/{{ item }}"
-#     state: directory
-#     owner: '1000'
-#     group: '1000'
-#     mode: 0o775
-#   with_items: "{{ container_names }}"
-#   loop_control:
-#     label: "{{ item }}"
-
-- name: persist application docker environnments
-  becone: true
+- name: persist application docker environnments or properties
+  become: true
   container_environments:
-    # template: container.env.j2
-    # environment: container.env
+    base_directory: "{{ container_env_directory }}"
     container: "{{ container }}"
-    mode: "0755"
+  register: _container_data
+  notify:
+    - update container for recreate running docker instance
+    - created environnments or properties
+
+- name: is a container restart necessary after changes to the protieries?  # noqa no-handler
+  set_fact:
+    container_update_needed: true
+    # container_changed: "{{ changed_application_properties | properties_changed }}"
+  when:
+    - _container_data.changed
+
+- name: flush handlers
+  meta: flush_handlers
+
 
 # - name: persist application docker environnments
 #   become: true
@@ -184,74 +179,74 @@
 #     container: "{{ container | update(container_changed) }}"
 #   when:
 #     - container_update_needed
-#
-# - name: create container volumes and mountpoints
-#   become: true
-#   container_mounts:
-#     data: "{{ container }}"
-#     volumes: true
-#     mounts: true
-#   register: _created_directories
-#   notify:
-#     - created container volumes and mountpoints
-#
-# - name: flush handlers
-#   meta: flush_handlers
-#
-# # - name: result
-# #   debug:
-# #     msg: "{{ _created_directories }}"
-# #   when:
-# #     - _created_directories.changed
-#
-# # - name: create container volumes
-# #   become: true
-# #   file:
-# #     name: "{{ item.local }}"
-# #     state: directory
-# #     owner: "{{ item.ansible.owner | default(omit) }}"
-# #     group: "{{ item.ansible.group | default(omit) }}"
-# #     mode: "{{ item.ansible.mode | default(omit) }}"
-# #   loop: "{{ container_volumes }}"
-# #   loop_control:
-# #     label: "{{ item.local }} /
-# #       ignore: {{ item.ansible.ignore | default('false') | bool }}
-# #       owner: {{ item.ansible.owner | default('-') }}
-# #       group: {{ item.ansible.group | default('-') }}
-# #       mode: {{ item.ansible.mode   | default('-') }}"
-# #   when:
-# #     - not item.ansible.ignore | default('false') | bool
-# #
-# # - name: create container mountpoints
-# #   become: true
-# #   file:
-# #     name: "{{ item.source }}"
-# #     state: directory
-# #     owner: "{{ item.source_handling.owner | default(omit) }}"
-# #     group: "{{ item.source_handling.group | default(omit) }}"
-# #     mode: "{{ item.source_handling.mode | default(omit) }}"
-# #   loop: "{{ container_mounts }}"
-# #   loop_control:
-# #     label: "{{ item.source }} /
-# #       owner: {{ item.source_handling.owner | default('-') }}
-# #       group: {{ item.source_handling.group | default('-') }}
-# #       mode: {{ item.source_handling.mode   | default('-') }}"
-#
-# # - name: remove environnments from container
-# #   set_fact:
-# #     container: "{{ container | remove_values('environments') }}"
-# #
-# # - name: remove properties from container
-# #   set_fact:
-# #     container: "{{ container | remove_values('properties') }}"
-#
-# - name: make sure ansible local facts directory exists
+
+- name: create container volumes and mountpoints
+  become: true
+  container_mounts:
+    data: "{{ container }}"
+    volumes: true
+    mounts: true
+  register: _created_directories
+  notify:
+    - created container volumes and mountpoints
+
+- name: flush handlers
+  meta: flush_handlers
+
+# - name: result
+#   debug:
+#     msg: "{{ _created_directories }}"
+#   when:
+#     - _created_directories.changed
+
+# - name: create container volumes
 #   become: true
 #   file:
-#     dest: /etc/ansible/facts.d
+#     name: "{{ item.local }}"
 #     state: directory
-#     owner: root
-#     group: root
-#     mode: 0o777
+#     owner: "{{ item.ansible.owner | default(omit) }}"
+#     group: "{{ item.ansible.group | default(omit) }}"
+#     mode: "{{ item.ansible.mode | default(omit) }}"
+#   loop: "{{ container_volumes }}"
+#   loop_control:
+#     label: "{{ item.local }} /
+#       ignore: {{ item.ansible.ignore | default('false') | bool }}
+#       owner: {{ item.ansible.owner | default('-') }}
+#       group: {{ item.ansible.group | default('-') }}
+#       mode: {{ item.ansible.mode   | default('-') }}"
+#   when:
+#     - not item.ansible.ignore | default('false') | bool
+#
+# - name: create container mountpoints
+#   become: true
+#   file:
+#     name: "{{ item.source }}"
+#     state: directory
+#     owner: "{{ item.source_handling.owner | default(omit) }}"
+#     group: "{{ item.source_handling.group | default(omit) }}"
+#     mode: "{{ item.source_handling.mode | default(omit) }}"
+#   loop: "{{ container_mounts }}"
+#   loop_control:
+#     label: "{{ item.source }} /
+#       owner: {{ item.source_handling.owner | default('-') }}
+#       group: {{ item.source_handling.group | default('-') }}
+#       mode: {{ item.source_handling.mode   | default('-') }}"
+
+# - name: remove environnments from container
+#   set_fact:
+#     container: "{{ container | remove_values('environments') }}"
+#
+# - name: remove properties from container
+#   set_fact:
+#     container: "{{ container | remove_values('properties') }}"
+
+- name: make sure ansible local facts directory exists
+  become: true
+  file:
+    dest: /etc/ansible/facts.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0o777
 
 ...

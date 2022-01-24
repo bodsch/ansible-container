@@ -48,16 +48,6 @@ class ContainerMounts(object):
             'ro': True
         }
 
-        self.uid = 1000
-        self.gid = 1000
-
-        # self.module.log(msg="------------------------------")
-        # self.module.log(msg="state          {}".format(self.state))
-        # self.module.log(msg="dest           {}".format(self.dest))
-        # self.module.log(msg="checksum_file  {}".format(self.checksum_file))
-        # self.module.log(msg="properties     {}".format(self.properties))
-        # self.module.log(msg="------------------------------")
-
     def run(self):
         """
         """
@@ -84,7 +74,7 @@ class ContainerMounts(object):
             return dict(
                 changed = False,
                 failed = False,
-                msg = "mothing to do"
+                msg = "nothing to do"
             )
 
         current_state = self.__analyse_directories(full_list)
@@ -92,13 +82,10 @@ class ContainerMounts(object):
 
         final_state = self.__analyse_directories(full_list)
 
-        # self.module.log("{}".format(current_state))
-        # self.module.log("{}".format(final_state))
-
         equal_lists, diff = self.__compare_two_lists(list1=current_state, list2=final_state)
 
-        # self.module.log("{}".format(equal_lists))
-        # self.module.log("{}".format(diff))
+        # TODO
+        # remove custom fields from 'volumes'
 
         if not equal_lists:
             result['msg'] = "changed or created directories"
@@ -361,9 +348,9 @@ class ContainerMounts(object):
         # self.module.log("  {0}".format(diff[:5]))
 
         result = len(diff) == 0
-        if not result:
-            self.module.log("There are {0} differences:".format(len(diff)))
-            self.module.log("  {0}".format(diff[:5]))
+        # if not result:
+        #     self.module.log("There are {0} differences:".format(len(diff)))
+        #     self.module.log("  {0}".format(diff[:5]))
         return result, diff
 
 
@@ -403,7 +390,7 @@ def main():
     p = ContainerMounts(module)
     result = p.run()
 
-    module.log(msg="= result: {}".format(result))
+    # module.log(msg="= result: {}".format(result))
     module.exit_json(**result)
 
 
