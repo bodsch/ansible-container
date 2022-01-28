@@ -1,0 +1,32 @@
+---
+
+- name: created application directories
+  debug:
+    msg: "{{ _created_directories.created_directories }}"
+  when:
+    - _created_directories.changed
+    - _created_directories.created_directories is defined
+
+- name: created container volumes and mountpoints
+  debug:
+    msg: "{{ _created_directories.created_directories }}"
+  when:
+    - _created_directories.changed
+    - _created_directories.created_directories is defined
+
+- name: update container for recreate running docker instance
+  set_fact:
+    container: "{{ _container_data.container_data }}"
+  when:
+    - _container_data is defined
+    - _container_data.container_data is defined
+
+- name: created environnments or properties
+  debug:
+    msg: "{{ _container_data.state }}"
+  when:
+    - _container_data is defined
+    - _container_data.state is defined
+    - _container_data.changed
+
+...

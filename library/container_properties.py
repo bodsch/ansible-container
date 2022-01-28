@@ -82,6 +82,9 @@ class ContainerProperties(object):
                 msg="no changes"
             )
 
+        # data['recreate'] = True
+        # _ = data.pop("properties")
+
         with open(self.dest, "w") as f:
             f.write(data)
 
