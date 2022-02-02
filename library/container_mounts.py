@@ -291,7 +291,13 @@ class ContainerMounts(object):
 
             # change mode
             if os.path.isdir(source) and force_mode is not None:
-                os.chmod(source, int(force_mode, base=8))
+
+                if isinstance(force_mode, int):
+                    mode = int(str(force_mode), base=8)
+                if isinstance(force_mode, str):
+                    mode = int(force_mode, base=8)
+
+                os.chmod(source, mode)
 
             # change ownership
             if force_owner is not None or force_group is not None:
@@ -302,7 +308,7 @@ class ContainerMounts(object):
                     """
                     if force_owner is not None:
                         try:
-                            force_owner = pwd.getpwnam(force_owner).pw_uid
+                            force_owner = pwd.getpwnam(str(force_owner)).pw_uid
                         except KeyError:
                             force_owner = int(force_owner)
                             pass
@@ -313,7 +319,7 @@ class ContainerMounts(object):
 
                     if force_group is not None:
                         try:
-                            force_group = grp.getgrnam(force_group).gr_gid
+                            force_group = grp.getgrnam(str(force_group)).gr_gid
                         except KeyError:
                             force_group = int(force_group)
                             pass
