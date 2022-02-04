@@ -45,9 +45,11 @@
     recreate: "{{ item.recreate | default(omit) }}"  # <==  RESTARTS container after EVERY ansible run
     restart: "{{ item.restart | default(omit) }}"
     restart_policy: "{{ item.restart_policy | default('on-failure') }}"
+    restart_retries: "{{ item.restart_retries | default(omit) }}"
     state: "{{ item.state | default('started') }}"
     ulimits: "{{ item.ulimits | default(omit) }}"
     volumes: "{{ item.volumes | default([]) | remove_custom_fields }}"
+    volumes_from: "{{ item.volumes_from | default([]) }}"
   register: create_container_instances
   with_items: "{{ container }}"
   loop_control:
@@ -98,9 +100,11 @@
     recreate: "{{ item.recreate | default(omit) }}"  # <==  RESTARTS container after EVERY ansible run
     restart: "{{ item.restart | default(omit) }}"
     restart_policy: "{{ item.restart_policy | default('on-failure') }}"
+    restart_retries: "{{ item.restart_retries | default(omit) }}"
     state: "{{ item.state | default('started') }}"
     ulimits: "{{ item.ulimits | default(omit) }}"
     volumes: "{{ item.volumes | default([]) | remove_custom_fields }}"
+    volumes_from: "{{ item.volumes_from | default([]) }}"
   register: create_container_instances
   with_items: "{{ container }}"
   loop_control:
