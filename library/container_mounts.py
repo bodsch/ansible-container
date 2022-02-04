@@ -291,7 +291,6 @@ class ContainerMounts(object):
 
             # change mode
             if os.path.isdir(source) and force_mode is not None:
-
                 if isinstance(force_mode, int):
                     mode = int(str(force_mode), base=8)
                 if isinstance(force_mode, str):

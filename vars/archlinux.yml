@@ -2,7 +2,7 @@
 
 container_packages:
     - openssl
-    - python3-docker
+    - python-docker
     - jq
 
 ...
