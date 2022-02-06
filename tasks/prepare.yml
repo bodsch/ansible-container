@@ -74,14 +74,6 @@
   set_fact:
     container_images: "{{ container | container_images }}"
 
-# - name: detect container volumes
-#   set_fact:
-#     container_volumes: "{{ container | container_volumes }}"
-#
-# - name: detect container mountpoints
-#   set_fact:
-#     container_mounts: "{{ container | container_mounts }}"
-
 - name: validate container mountpoints
   fail:
     msg: "your mounts definition is not valid!\n
@@ -137,48 +129,11 @@
 - name: is a container restart necessary after changes to the protieries?  # noqa no-handler
   set_fact:
     container_update_needed: true
-    # container_changed: "{{ changed_application_properties | properties_changed }}"
   when:
     - _container_data.changed
 
 - name: flush handlers
   meta: flush_handlers
-
-
-# - name: persist application docker environnments
-#   become: true
-#   template:
-#     src: container.env.j2
-#     dest: "{{ container_env_directory }}/{{ item.name }}/container.env"
-#     mode: 0o755
-#   with_items: "{{ container }}"
-#   loop_control:
-#     label: "{{ item.name }}"
-#
-# - name: persist application properties
-#   become: true
-#   container_properties:
-#     dest: "{{ container_env_directory }}/{{ item.name }}/{{ item.name }}.properties"
-#     properties: "{{ item.properties }}"
-#   loop: "{{ container }}"
-#   loop_control:
-#     label: "{{ item.name }}"
-#   register: changed_application_properties
-#   when:
-#     - item.properties is defined
-#
-# - name: Is a container restart necessary after changes to the protieries?  # noqa no-handler
-#   set_fact:
-#     container_update_needed: true
-#     container_changed: "{{ changed_application_properties | properties_changed }}"
-#   when:
-#     - changed_application_properties.changed
-#
-# - name: update container for recreate running docker instance
-#   set_fact:
-#     container: "{{ container | update(container_changed) }}"
-#   when:
-#     - container_update_needed
 
 - name: create container volumes and mountpoints
   become: true
@@ -192,53 +147,6 @@
 
 - name: flush handlers
   meta: flush_handlers
-
-# - name: result
-#   debug:
-#     msg: "{{ _created_directories }}"
-#   when:
-#     - _created_directories.changed
-
-# - name: create container volumes
-#   become: true
-#   file:
-#     name: "{{ item.local }}"
-#     state: directory
-#     owner: "{{ item.ansible.owner | default(omit) }}"
-#     group: "{{ item.ansible.group | default(omit) }}"
-#     mode: "{{ item.ansible.mode | default(omit) }}"
-#   loop: "{{ container_volumes }}"
-#   loop_control:
-#     label: "{{ item.local }} /
-#       ignore: {{ item.ansible.ignore | default('false') | bool }}
-#       owner: {{ item.ansible.owner | default('-') }}
-#       group: {{ item.ansible.group | default('-') }}
-#       mode: {{ item.ansible.mode   | default('-') }}"
-#   when:
-#     - not item.ansible.ignore | default('false') | bool
-#
-# - name: create container mountpoints
-#   become: true
-#   file:
-#     name: "{{ item.source }}"
-#     state: directory
-#     owner: "{{ item.source_handling.owner | default(omit) }}"
-#     group: "{{ item.source_handling.group | default(omit) }}"
-#     mode: "{{ item.source_handling.mode | default(omit) }}"
-#   loop: "{{ container_mounts }}"
-#   loop_control:
-#     label: "{{ item.source }} /
-#       owner: {{ item.source_handling.owner | default('-') }}
-#       group: {{ item.source_handling.group | default('-') }}
-#       mode: {{ item.source_handling.mode   | default('-') }}"
-
-# - name: remove environnments from container
-#   set_fact:
-#     container: "{{ container | remove_values('environments') }}"
-#
-# - name: remove properties from container
-#   set_fact:
-#     container: "{{ container | remove_values('properties') }}"
 
 - name: make sure ansible local facts directory exists
   become: true
