@@ -16,8 +16,8 @@
     cpu_quota: "{{ item.cpu_quota | default(omit) }}"
     cpu_shares: "{{ item.cpu_shares | default(omit) }}"
     cpus: "{{ item.cpus | default(omit) }}"
-    cpuset_cpus: "{{ item.cpuset_cpus | default(omit) }}"
-    cpuset_mems: "{{ item.cpuset_mems | default(omit) }}"
+    cpuset_cpus: "{{ item.cpuset_cpus | default(omit) | string }}"
+    cpuset_mems: "{{ item.cpuset_mems | default(omit) | string }}"
     devices: "{{ item.devices | default(omit) }}"
     dns_servers: "{{ item.dns_servers | default(omit) }}"
     env_file: "{{ container_env_directory }}/{{ item.name }}/container.env"
@@ -51,6 +51,7 @@
     volumes: "{{ item.volumes | default([]) | remove_custom_fields }}"
     volumes_from: "{{ item.volumes_from | default([]) }}"
   register: create_container_instances
+  ignore_errors: true
   with_items: "{{ container }}"
   loop_control:
     label: "{{ item.name }} - hostname: {{ item.name }} - image: {{ item.image }}"
@@ -73,8 +74,8 @@
     cpu_quota: "{{ item.cpu_quota | default(omit) }}"
     cpu_shares: "{{ item.cpu_shares | default(omit) }}"
     cpus: "{{ item.cpus | default(omit) }}"
-    cpuset_cpus: "{{ item.cpuset_cpus | default(omit) }}"
-    cpuset_mems: "{{ item.cpuset_mems | default(omit) }}"
+    cpuset_cpus: "{{ item.cpuset_cpus | default(omit) | string }}"
+    cpuset_mems: "{{ item.cpuset_mems | default(omit) | string }}"
     devices: "{{ item.devices | default(omit) }}"
     dns_servers: "{{ item.dns_servers | default(omit) }}"
     env_file: "{{ container_env_directory }}/{{ item.name }}/container.env"
@@ -106,6 +107,7 @@
     volumes: "{{ item.volumes | default([]) | remove_custom_fields }}"
     volumes_from: "{{ item.volumes_from | default([]) }}"
   register: create_container_instances
+  ignore_errors: true
   with_items: "{{ container }}"
   loop_control:
     label: "{{ item.name }} - hostname: {{ item.name }} - image: {{ item.image }}"
@@ -114,6 +116,12 @@
 - name: reporting changes
   debug:
     msg: "{{ create_container_instances.results | selectattr('changed', 'equalto', True) | reporting }}"
+  when:
+    - container_reporting_changes
+
+- name: failed changes
+  debug:
+    msg: "{{ create_container_instances.results | selectattr('failed', 'equalto', True) | reporting }}"
   when:
     - container_reporting_changes
 
