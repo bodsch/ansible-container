@@ -38,6 +38,8 @@
           shell:
             rm -rf /usr/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages/pip* ;
             python -m ensurepip --default-pip --upgrade
+          args:
+            warn: false
 
         - name: update pip3 to latest
           pip:
