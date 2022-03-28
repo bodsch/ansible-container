@@ -35,6 +35,11 @@
   when:
     - ansible_os_family | lower == 'debian'
 
+- name: include broken_python
+  include_tasks: broken_python.yml
+  when:
+    - ansible_os_family | lower == 'archlinux'
+
 - name: python support
   block:
     - name: create requirements.txt

@@ -15,8 +15,6 @@
       when:
         - ansible_distribution | lower == 'archlinux'
 
-
-
     - debug:
         msg:
           - "os family            : {{ ansible_os_family }}"
