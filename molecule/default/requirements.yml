@@ -3,6 +3,6 @@
 - name: docker
   src: https://github.com/bodsch/ansible-role-docker.git
   scm: git
-  version: 3.0.7
+  version: 3.0.9
 
 ...
