@@ -13,6 +13,20 @@ ansible role for docker deployment of generic container applications
 [releases]: https://github.com/bodsch/ansible-container/releases
 
 
+## Requirements & Dependencies
+
+- pip module `ruamel.yaml`
+
+
+### Operating systems
+
+Tested on
+
+* Arch Linux
+* Debian based
+    - Debian 10 / 11
+    - Ubuntu 20.10
+
 ## usage
 
 ### container registry
