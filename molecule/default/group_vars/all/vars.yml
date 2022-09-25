@@ -44,6 +44,21 @@ container:
           owner: "800"
           group: "999"
           mode: "0700"
+      - source: /opt/registry
+        target: /opt/data
+        type: bind
+        source_handling:
+          create: true
+          owner: "1000"
+          group: "1000"
+          mode: "0750"
+      - source: "{{ container_env_directory }}/registry/config.yml"
+        target: /etc/docker/registry/config.yml
+        type: bind
+        read_only: true
+        source_handling:
+          create: false
+
 
   - name: whoami
     image: jwilder/whoami

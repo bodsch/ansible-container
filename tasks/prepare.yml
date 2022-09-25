@@ -64,18 +64,19 @@
     name: "{{ container_packages }}"
     state: present
 
-- name: merge container registry configuration between defaults and custom
+- name: merge container  configuration between defaults and custom
   set_fact:
-    container_registry: "{{ container_registry_default |
-      combine( container_registry, recursive=True ) }}"
+    container_registry: "{{ container_registry_default | combine( container_registry, recursive=True ) }}"
 
-- name: get container_names from container
+- name: define some container facts
   set_fact:
     container_names: "{{ container | container_names }}"
-
-- name: get container_images from container
-  set_fact:
     container_images: "{{ container | container_images }}"
+    container_mounts: "{{ container | container_mounts }}"
+
+- name: d
+  debug:
+    msg: "{{ container_mounts }}"
 
 - name: validate container mountpoints
   fail:
