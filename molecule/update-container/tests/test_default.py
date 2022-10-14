@@ -57,8 +57,6 @@ def test_directory(host, get_vars):
 
 
 @pytest.mark.parametrize("files", [
-    "nginx-proxy",
-    "whoami",
     "hello-world"
 ])
 def test_environments(host, get_vars, files):
