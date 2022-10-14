@@ -85,18 +85,18 @@ def get_vars(host):
     return result
 
 
-@ pytest.mark.parametrize("files", [
-    "hello-world"
-])
-def test_environments(host, get_vars, files):
-    dir = host.file(get_vars.get('container_env_directory'))
-
-    for file in [
-        f"{dir.linked_to}/{files}/container.env",
-        f"{dir.linked_to}/{files}/.container.env.checksum"
-    ]:
-        f = host.file(file)
-        assert f.is_file
+# @ pytest.mark.parametrize("files", [
+#     "hello-world"
+# ])
+# def test_environments(host, get_vars, files):
+#     dir = host.file(get_vars.get('container_env_directory'))
+#
+#     for file in [
+#         f"{dir.linked_to}/{files}/container.env",
+#         f"{dir.linked_to}/{files}/.container.env.checksum"
+#     ]:
+#         f = host.file(file)
+#         assert f.is_file
 
 
 @ pytest.mark.parametrize("files", [
@@ -113,17 +113,17 @@ def test_properties(host, get_vars, files):
         assert f.is_file
 
 
-def test_environment_file(host, get_vars):
-    """
-    """
-    dir = host.file(get_vars.get('container_env_directory'))
-
-    virtual_host = "hello-world.local"
-
-    environment_file = host.file(f"{dir.linked_to}/hello-world/container.env")
-
-    assert environment_file.is_file
-    assert virtual_host in environment_file.content_string
+# def test_environment_file(host, get_vars):
+#     """
+#     """
+#     dir = host.file(get_vars.get('container_env_directory'))
+#
+#     virtual_host = "hello-world.local"
+#
+#     environment_file = host.file(f"{dir.linked_to}/hello-world/container.env")
+#
+#     assert environment_file.is_file
+#     assert virtual_host in environment_file.content_string
 
 
 def test_property_file(host, get_vars):
