@@ -1,7 +1,7 @@
 ---
 
 - name: create docker network
-  docker_network:
+  community.general.docker_network:
     name: "{{ item.name }}"
     state: "{{ item.state | default('present') }}"
     enable_ipv6: false
@@ -13,5 +13,7 @@
   loop_control:
     label: "{{ item.name.ljust(12) }}: {{ item.iprange }} - state: {{ item.state | default('present') }}"
   when: container_use_network
+  tags:
+    - container_network
 
 ...

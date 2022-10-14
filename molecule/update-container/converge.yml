@@ -23,17 +23,9 @@
 
   vars:
     container:
-      - name: hello-world
-        hostname: hello-world
-        image: hello-world:latest
-        properties:
-          #
-          publisher.maxRecursionDepth: 900
-          # user and password for login to the staging serve
-          replicator.user: 'replicator'
-          replicator.password: 'replicator'
-          # replicator.domain: ''
-          replicator.tmp_dir: 'var/tmp'
+      - name: busybox
+        hostname: busybox
+        image: busybox:latest
 
   roles:
     - role: ansible-container

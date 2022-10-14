@@ -47,9 +47,9 @@ container_pre_tasks: []
 container_post_tasks: []
 ```
 
-You can define your own pre- or post-tasks.
+You can define your own pre- or post-tasks.  
 The individual scripts are executed before or after (re)starting the containers.  
-For example, you can use them to remove old container images, volumes ore othe things.  
+For example, you can use them to remove old container images, volumes or other things.  
 A few example scripts can be found under [`files`](./files):
 
 - `prune.sh`
@@ -62,11 +62,12 @@ A few example scripts can be found under [`files`](./files):
 
 ## container configuration
 
+Simple example:
 
 ```yaml
 container:
   - name: workflow
-    image: "{{ container_registry }}/workflow:{{ container_tag }}"
+    image: "{{ container_registry.host }}/workflow:{{ container_tag }}"
     pull: true
     state: started
     restart_policy: always
@@ -91,7 +92,8 @@ container:
       properties:
         publisher.maxRecursionDepth: 600
 ```
-## environments
+
+### environments
 
 All `environments` entries are persisted to a separate environments file on the target system.
 
@@ -99,13 +101,16 @@ E.g. under `/opt/container/${CONTAINER_NAME}/container.env`
 
 The target directory for persistence can be customized via `container_env_directory`.
 
-## properties
+### properties
 
 All `properties` entries are persisted to a separate properties file on the target system.
 
 E.g. under `/opt/container/${CONTAINER_NAME}/${CONTAINER_NAME}.properties`
 
-## custom fileds for volumes
+
+## volumes and mounts
+
+### custom fileds for volumes
 
 The idea behind the cutom_fields is to define corresponding rights in addition to the optional 
 creation of the directories.
@@ -125,7 +130,7 @@ The following variables can be used:
 - `mode`
 - `ignore`
 
-### Example
+#### Example
 
 ```yaml
 
@@ -137,10 +142,10 @@ The following variables can be used:
       - testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
 ```
 
-## custom fields for mounts
+### custom fields for mounts
 
 The `mounts` are similar to the `volumes`.
-Here, too, it is possible to create persistent directories in the host system via an extension.
+Here, too, it is possible to create persistent directories in the host system via an extension `source_handling`.
 
 
 With `create`, you can control whether the source directory should be created or not.
@@ -173,13 +178,38 @@ The specification of `owner` and `group` enables the setting of access rights.
 
 ## tests
 
-Local tests are executed in a docker container.
-
+Local tests are executed in a docker container.  
 Note that this container must provide its own docker daemon (*docker-in-docker*).
 
 ```bash
-tox -e py39-ansible29 -- molecule converge -s default
+make
+make verify
+make destroy
 ```
+
+You can call these tests with different Ansible versions:
+
+```bash
+make -e TOX_ANSIBLE=ansible_6.4
+make destroy -e TOX_ANSIBLE=ansible_6.4
+```
+
+Currently the following Ansible versions are configured:
+
+- 4.10
+- 5.1
+- 5.2
+- 6.1
+- 6.4
+
+Below `molecule`, various tests are provided. If none is explicitly specified, `default` is used.  
+To call a special test, you can define it via `-e TOX_SCENARIO=$TEST`.
+
+```bash
+make -e TOX_SCENARIO=multiple-container
+make destroy -e TOX_SCENARIO=multiple-container
+```
+
 
 ## filter_plugins
 

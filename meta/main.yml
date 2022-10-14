@@ -6,7 +6,7 @@ galaxy_info:
   author: Bodo Schulz
   description: A simple and generic role for deploying container
   license: Apache
-  min_ansible_version: 2.9
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
     - name: Debian

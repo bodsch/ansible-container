@@ -14,9 +14,11 @@ container_network:
     iprange: 172.9.27.0/26
 
 container:
-  - name: hello-world
-    hostname: hello-world
-    image: hello-world:latest
+  - name: nginx-proxy
+    hostname: nginx-proxy
+    image: jwilder/nginx-proxy:0.9.3-alpine
+    published_ports:
+      - 8080:80
     volumes:
       - /run/docker.sock:/tmp/docker.sock:ro
       - /tmp/nginx:/tmp/nginx:ro
@@ -56,6 +58,19 @@ container:
         read_only: true
         source_handling:
           create: false
+
+
+  - name: whoami
+    image: jwilder/whoami
+    environments:
+      VIRTUAL_HOST: whoami.local
+      # TEST_WORF: true
+      DBA_HOST: database
+      DBA_USER: username
+
+  - name: hello-world
+    hostname: hello-world
+    image: hello-world:latest
     properties:
       publisher.maxRecursionDepth: 600
       # user and password for login to the staging serve
