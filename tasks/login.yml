@@ -1,13 +1,12 @@
 ---
 
-- block:
-    - name: log into private registry and force re-authorization
-      docker_login:
-        registry: "{{ container_registry.host }}"
-        username: "{{ container_registry.username }}"
-        password: "{{ container_registry.password }}"
-        reauthorize: true
-      register: registry_login
+- name: log into private registry and force re-authorization
+  community.general.docker_login:
+    registry: "{{ container_registry.host }}"
+    username: "{{ container_registry.username }}"
+    password: "{{ container_registry.password }}"
+    reauthorize: true
+  register: registry_login
   when:
     - container_registry.host is defined
     - container_registry.username is defined
@@ -15,3 +14,5 @@
     - container_registry.host | length != 0
     - container_registry.username | length != 0
     - container_registry.password | length != 0
+  tags:
+    - container_registry_login

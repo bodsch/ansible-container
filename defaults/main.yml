@@ -9,7 +9,7 @@ container_registry:
   username: ''
   password: ''
 
-container: {}
+container: []
 
 container_pre_tasks: []
 container_post_tasks: []

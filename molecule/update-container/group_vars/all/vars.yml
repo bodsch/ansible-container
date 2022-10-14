@@ -1,0 +1,12 @@
+---
+
+container:
+  - name: busybox
+    hostname: busybox
+    image: busybox:1.35.0
+
+container_post_tasks:
+  - /usr/local/bin/remove_untagged_images.sh
+  - /usr/local/bin/list_all_images.sh
+
+...

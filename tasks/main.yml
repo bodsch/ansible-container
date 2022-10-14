@@ -1,38 +1,57 @@
 ---
 
 - name: preparement
-  include_tasks: prepare.yml
+  ansible.builtin.include_tasks: prepare.yml
+  tags:
+    - always
 
 - name: pre and post tasks
-  include_tasks: custom-tasks/main.yml
+  ansible.builtin.include_tasks: custom-tasks/main.yml
+  tags:
+    - container_install_pre_or_post_tasks
 
 - name: network
-  include_tasks: network.yml
+  ansible.builtin.include_tasks: network.yml
+  tags:
+    - container_network
 
 - name: login into container registry
-  include_tasks: login.yml
+  ansible.builtin.include_tasks: login.yml
+  tags:
+    - container_registry_login
+    - container_pull
 
 - name: download new container
-  include_tasks: download.yml
+  ansible.builtin.include_tasks: download.yml
+  tags:
+    - container_pull
 
 - name: execute pre-tasks
-  include_tasks: custom-tasks/pre-tasks.yml
+  ansible.builtin.include_tasks: custom-tasks/pre-tasks.yml
   when:
     - container_pre_tasks is defined
     - container_pre_tasks | count > 0
+  tags:
+    - container_install_pre_or_post_tasks
+    - container_exec_pre_tasks
 
 - name: launch container
-  include_tasks: launch_container.yml
+  ansible.builtin.include_tasks: launch/main.yml
+  tags:
+    - container_launch
 
 - name: execute post-tasks
-  include_tasks: custom-tasks/post-tasks.yml
+  ansible.builtin.include_tasks: custom-tasks/post-tasks.yml
   when:
     - container_post_tasks is defined
     - container_post_tasks | count > 0
+  tags:
+    - container_install_pre_or_post_tasks
+    - container_exec_post_tasks
 
 - name: remove update fact
   become: true
-  file:
+  ansible.builtin.file:
     path: /etc/ansible/facts.d/update_container.fact
     state: absent
 
