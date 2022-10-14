@@ -5,19 +5,19 @@
 # BSD 2-clause (see LICENSE or https://opensource.org/licenses/BSD-2-Clause)
 
 from __future__ import absolute_import, division, print_function
-import os
-# import json
-import pwd
+
 import grp
-
-from ruamel.yaml import YAML
-
+# import json
+import os
+import pwd
 from ansible.module_utils.basic import AnsibleModule
+from ruamel.yaml import YAML
 
 
 class ContainerMounts(object):
     """
     """
+
     def __init__(self, module):
         """
         """
@@ -66,27 +66,25 @@ class ContainerMounts(object):
             migrated_volumes = self.__migrate_volumes(all_volumes)
 
         if self.mounts:
-            all_mounts  = self.__mounts()
+            all_mounts = self.__mounts()
 
         full_list = migrated_volumes + all_mounts
 
         if len(full_list) == 0:
             return dict(
-                changed = False,
-                failed = False,
-                msg = "nothing to do"
+                changed=False,
+                failed=False,
+                msg="nothing to do"
             )
 
         current_state = self.__analyse_directories(full_list)
         self.__create_directories(full_list, current_state)
-
         final_state = self.__analyse_directories(full_list)
 
         equal_lists, diff = self.__compare_two_lists(list1=current_state, list2=final_state)
 
         # TODO
         # remove custom fields from 'volumes'
-
         if not equal_lists:
             result['msg'] = "changed or created directories"
             msg = ""
@@ -117,14 +115,20 @@ class ContainerMounts(object):
 
     def __mounts(self):
         """
+          get only mountspoint when we add source_handling and set create to True
         """
-        # self.module.log("- __mounts()")
         all_mounts = []
 
         for d in self.data:
-            _m = d.get('mounts', [])
-            if len(_m) > 0:
-                all_mounts = _m
+            """
+            """
+            mount_defintions = d.get('mounts', [])
+
+            for mount in mount_defintions:
+                source_handling = mount.get('source_handling', {}).get("create", False)
+
+                if len(mount_defintions) > 0 and source_handling:
+                    all_mounts.append(mount)
 
         return all_mounts
 
@@ -193,22 +197,23 @@ class ContainerMounts(object):
                 values = entry.split(':')
                 count = len(values)
 
-                local_volume  = values[0]
+                local_volume = values[0]
                 remote_volume = values[1]
 
                 if count == 3 and values[2]:
                     read_mode = values[2]
 
-                valid = (local_volume.endswith(self.volume_block_list_ends) or local_volume.startswith(self.volume_block_list_starts))
+                valid = (local_volume.endswith(self.volume_block_list_ends) or local_volume.startswith(
+                    self.volume_block_list_starts))
 
                 if not valid:
                     """
                     """
                     res = dict(
-                        source = local_volume,   # values[0],
-                        target = remote_volume,  # values[1],
-                        type = "bind",
-                        source_handling = c_fields
+                        source=local_volume,  # values[0],
+                        target=remote_volume,  # values[1],
+                        type="bind",
+                        source_handling=c_fields
                     )
 
                     if read_mode is not None:
@@ -220,11 +225,9 @@ class ContainerMounts(object):
 
     def __analyse_directories(self, directory_tree):
         """
+          set current owner, group and mode to source entry
         """
-        # self.module.log("- __analyse_directories(directory_tree)")
         result = []
-
-        # analyse first"
         for entry in directory_tree:
             """
             """
@@ -233,28 +236,33 @@ class ContainerMounts(object):
             source = entry.get('source')
             current_owner = None
             current_group = None
-            current_mode  = None
+            current_mode = None
 
             res[source] = {}
 
             if os.path.isdir(source):
                 _state = os.stat(source)
                 try:
-                    current_owner  = pwd.getpwuid(_state.st_uid).pw_uid
-                except KeyError:
+                    current_owner = pwd.getpwuid(_state.st_uid).pw_uid
+                except KeyError as e:
+                    self.module.log(f"   WARNING getpwuid : {source} {e}")
                     pass
+
                 try:
                     current_group = grp.getgrgid(_state.st_gid).gr_gid
-                except KeyError:
+                except KeyError as e:
+                    self.module.log(f"   WARNING getgrgid : {source} {e}")
                     pass
+
                 try:
-                    current_mode  = oct(_state.st_mode)[-3:]
-                except KeyError:
+                    current_mode = oct(_state.st_mode)[-3:]
+                except KeyError as e:
+                    self.module.log(f"   WARNING st_mode  : {source} {e}")
                     pass
 
             res[source]['owner'] = current_owner
             res[source]['group'] = current_group
-            res[source]['mode']  = current_mode
+            res[source]['mode'] = current_mode
 
             result.append(res)
 
@@ -263,17 +271,15 @@ class ContainerMounts(object):
     def __create_directories(self, directory_tree, current_state):
         """
         """
-        # self.module.log("- __create_directories(directory_tree, current_state)")
-
         for entry in directory_tree:
             """
             """
             source = entry.get('source')
             source_handling = entry.get('source_handling', {})
             force_create = source_handling.get('create', None)
-            force_owner  = source_handling.get('owner', None)
-            force_group  = source_handling.get('group', None)
-            force_mode   = source_handling.get('mode', None)
+            force_owner = source_handling.get('owner', None)
+            force_group = source_handling.get('group', None)
+            force_mode = source_handling.get('mode', None)
 
             curr = self.__find_in_list(current_state, source)
 
@@ -363,7 +369,6 @@ class ContainerMounts(object):
 # Module execution.
 
 def main():
-
     module = AnsibleModule(
         argument_spec=dict(
             data=dict(
