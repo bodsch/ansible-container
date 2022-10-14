@@ -42,25 +42,25 @@ class FilterModule(object):
         seen = {}
         data = {}
 
-        if(isinstance(mydict, list)):
+        if (isinstance(mydict, list)):
             data = mydict['results']
 
         for i in data:
-            if(isinstance(i, dict)):
+            if (isinstance(i, dict)):
                 cont = {}
                 item = {}
 
-                if('container' in i):
+                if ('container' in i):
                     cont = i.get('container')
-                if('item' in i):
+                if ('item' in i):
                     item = i.get('item')
 
-                if(cont):
+                if (cont):
                     name = cont.get('Name').strip("/")
                     # display.vv("found: {}".format(name))
                     image         = cont.get('Config').get('Image')
                     created       = cont.get('Created')
-                elif(item):
+                elif (item):
                     name = item.get('name')
                     # display.vv("found: {}".format(name))
                     image         = item.get('image')
@@ -89,7 +89,7 @@ class FilterModule(object):
         """
         result = {}
 
-        if(isinstance(left_dict, list)):
+        if (isinstance(left_dict, list)):
             _dict = {}
 
             for e in left_dict:
@@ -121,7 +121,7 @@ class FilterModule(object):
                 left  = json.dumps(l_dict, sort_keys=True)
                 right = json.dumps(r_dict, sort_keys=True)
 
-                if(left != right):
+                if (left != right):
                     result[k] = l_dict
 
         # display.v("return : {}".format(result))
@@ -146,15 +146,15 @@ class FilterModule(object):
         """
         """
         result = []
-        if(isinstance(data, dict)):
+        if (isinstance(data, dict)):
             data = data['results']
 
         for i in data:
-            if(isinstance(i, dict)):
+            if (isinstance(i, dict)):
                 changed = i.get('changed', False)
                 item    = i.get('item', None)
 
-                if(changed):
+                if (changed):
                     result.append(item)
 
         return result
@@ -165,11 +165,11 @@ class FilterModule(object):
         result = []
         # display.v("filter_properties_changed({})".format({}))
 
-        if(isinstance(data, dict)):
+        if (isinstance(data, dict)):
             data = data['results']
 
         for i in data:
-            if(isinstance(i, dict)):
+            if (isinstance(i, dict)):
                 changed = i.get('changed', False)
                 item    = i.get('item', {}).get('name', None)
 
@@ -313,7 +313,7 @@ class FilterModule(object):
         """
         """
         # display.v(f"remove_source_handling({data})")
-        if(isinstance(data, list)):
+        if (isinstance(data, list)):
             data = self._del_keys_from_dict(data, 'source_handling')
 
         # display.v("return : {}".format(data))
@@ -336,7 +336,7 @@ class FilterModule(object):
         """
         result = []
 
-        if(isinstance(data, list)):
+        if (isinstance(data, list)):
             for item in data:
                 data = item.get('item', {})
                 name = data.get('name', None)
@@ -359,9 +359,9 @@ class FilterModule(object):
         """
         result = []
         for i in dictionary:
-            if(isinstance(i, dict)):
+            if (isinstance(i, dict)):
                 k = i.get(key, None)
-                if(k):
+                if (k):
                     result.append(k)
 
         return result
@@ -370,7 +370,7 @@ class FilterModule(object):
         """
         """
         for i in dictionary:
-            if(isinstance(i, dict)):
+            if (isinstance(i, dict)):
                 _ = i.pop(key, None)
 
         return dictionary
