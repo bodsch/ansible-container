@@ -26,6 +26,7 @@ class ContainerMounts(object):
         self.data = module.params.get("data")
         self.volumes = module.params.get("volumes")
         self.mounts = module.params.get("mounts")
+        self.debug = module.params.get("debug")
         self.owner = module.params.get("owner")
         self.group = module.params.get("group")
         self.mode = module.params.get("mode")
@@ -63,7 +64,7 @@ class ContainerMounts(object):
 
         if self.volumes:
             all_volumes = self.__volumes()
-            migrated_volumes = self.__migrate_volumes(all_volumes)
+            migrated_volumes = self.__migrate_volumes_to_mounts(all_volumes)
 
         if self.mounts:
             all_mounts = self.__mounts()
@@ -102,8 +103,8 @@ class ContainerMounts(object):
 
     def __volumes(self):
         """
+          return all volume definitions
         """
-        # self.module.log("- __volumes()")
         all_volumes = []
 
         for d in self.data:
@@ -122,9 +123,15 @@ class ContainerMounts(object):
         for d in self.data:
             """
             """
+            if self.debug:
+                self.module.log(f"- {d.get('name')}")
+
             mount_defintions = d.get('mounts', [])
 
             for mount in mount_defintions:
+                if self.debug:
+                    self.module.log(f"  mount: {mount}")
+
                 source_handling = mount.get('source_handling', {}).get("create", False)
 
                 if len(mount_defintions) > 0 and source_handling:
@@ -132,10 +139,35 @@ class ContainerMounts(object):
 
         return all_mounts
 
-    def __migrate_volumes(self, volumes):
+    def __migrate_volumes_to_mounts(self, volumes):
         """
+            migrate old volume definition into mount
+            ignore some definitions like:
+              - *.sock
+              - *.conf
+            etc. see self.volume_block_list_ends and self.volume_block_list_starts!
+
+            for example:
+              from: /tmp/testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
+              to:
+              - source: /tmp/testing5
+                target: /var/tmp/testing5
+                source_handling:
+                  create: false
+                  owner: "1001"
+                  mode: "0700"
+
+              from: /tmp/testing3:/var/tmp/testing3:rw|{owner="999",group="1000"}
+              to:
+              - source: /tmp/testing3
+                target: /var/tmp/testing3
+                source_handling:
+                  create: true
+                  owner: "999"
+                  group: "1000"
         """
-        # self.module.log("- __migrate_volumes(volumes)")
+        if self.debug:
+            self.module.log("__migrate_volumes_to_mounts(volumes)")
 
         result = []
         yaml = YAML()
@@ -161,31 +193,18 @@ class ContainerMounts(object):
                     code.insert(0, 'create', not value)
                     del code[key]
 
-            return dict(code)
+            if self.debug:
+                self.module.log(f"    custom_fields: {dict(code)}")
 
-        # from: /tmp/testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
-        # to:
-        # - source: /tmp/testing5
-        #   target: /var/tmp/testing5
-        #   source_handling:
-        #     create: false
-        #     owner: "1001"
-        #     mode: "0700"
-        #
-        # from: /tmp/testing3:/var/tmp/testing3:rw|{owner="999",group="1000"}
-        # to:
-        # - source: /tmp/testing3
-        #   target: /var/tmp/testing3
-        #   source_handling:
-        #     create: true
-        #     owner: "999"
-        #     group: "1000"
-        #
+            return dict(code)
 
         for d in volumes:
             for entry in d:
                 """
                 """
+                if self.debug:
+                    self.module.log(f"  - {entry}")
+
                 read_mode = None
                 c_fields = dict()
                 values = entry.split('|')
@@ -210,7 +229,7 @@ class ContainerMounts(object):
                     """
                     """
                     res = dict(
-                        source=local_volume,  # values[0],
+                        source=local_volume,   # values[0],
                         target=remote_volume,  # values[1],
                         type="bind",
                         source_handling=c_fields
@@ -241,23 +260,28 @@ class ContainerMounts(object):
             res[source] = {}
 
             if os.path.isdir(source):
+                if self.debug:
+                    self.module.log(f"- {source}")
                 _state = os.stat(source)
                 try:
                     current_owner = pwd.getpwuid(_state.st_uid).pw_uid
                 except KeyError as e:
-                    self.module.log(f"   WARNING getpwuid : {source} {e}")
+                    if self.debug:
+                        self.module.log(f"  {e}")
                     pass
 
                 try:
                     current_group = grp.getgrgid(_state.st_gid).gr_gid
                 except KeyError as e:
-                    self.module.log(f"   WARNING getgrgid : {source} {e}")
+                    if self.debug:
+                        self.module.log(f"  {e}")
                     pass
 
                 try:
                     current_mode = oct(_state.st_mode)[-3:]
                 except KeyError as e:
-                    self.module.log(f"   WARNING st_mode  : {source} {e}")
+                    if self.debug:
+                        self.module.log(f"  {e}")
                     pass
 
             res[source]['owner'] = current_owner
@@ -355,13 +379,12 @@ class ContainerMounts(object):
         # [i for i in list1 + list2 if i not in list1 or i not in list2]
         diff = [x for x in list2 if x not in list1]
 
-        # self.module.log("  {0}".format(diff))
-        # self.module.log("  {0}".format(diff[:5]))
-
         result = len(diff) == 0
-        # if not result:
-        #     self.module.log("There are {0} differences:".format(len(diff)))
-        #     self.module.log("  {0}".format(diff[:5]))
+        if self.debug:
+            if not result:
+                self.module.log(f"There are {len(diff)} differences:")
+                self.module.log(f"  {diff[:5]}")
+
         return result, diff
 
 
@@ -381,6 +404,11 @@ def main():
             ),
             mounts=dict(
                 required=True,
+                type='bool'
+            ),
+            debug=dict(
+                required=False,
+                default=False,
                 type='bool'
             ),
             owner=dict(

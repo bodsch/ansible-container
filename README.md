@@ -29,9 +29,72 @@ Tested on
 
 ## usage
 
-### container registry
+```
+container_reporting:
+  changes: true
+  failed: true
 
-A private registry can be used as the registry.
+container_fail:
+  error_at_launch: true
+
+container_env_directory: /opt/container
+
+container_registry:
+  host: ''
+  username: ''
+  password: ''
+
+container: []
+
+container_pre_tasks: []
+container_post_tasks: []
+
+container_use_network: true
+container_network: []
+
+container_comparisons:
+  # '*': ignore
+  image: strict   # don't restart containers with older versions of the image
+  env: strict     # we want precisely this environment
+  labels: ignore
+
+container_default_behavior: "compatibility"
+container_clean_update_fact: true
+```
+
+### `container_reporting`
+
+If there is a change in the started containers, a report can be issued.
+This can concern both changes and failures.
+
+```yaml
+container_reporting:
+  changes: true
+  failed: true
+```
+
+### `container_fail`
+
+If there was an error when starting a container, you can define here whether you want to ignore the error.
+
+```yaml
+container_fail:
+  error_at_launch: true
+```
+
+### `container_env_directory`
+
+Defines the directory in which the environment data and the properties are persisted.
+
+```yaml
+container_env_directory: /opt/container
+```
+
+
+### `container registry`
+
+Configures a container registry.
+If `host`, `username` and `password` are defined, a corresponding login to the registry is also carried out.
 
 ```yaml
 container_registry:
@@ -40,16 +103,17 @@ container_registry:
   password: ''
 ```
 
-### pre and post tasks
+### `container_pre_tasks` and `container_post_tasks`
+
+You can define your own pre- or post-tasks.  
+The individual scripts are executed before or after (re)starting the containers.  
+For example, you can use them to remove old container images, volumes or other things.  
 
 ```yaml
 container_pre_tasks: []
 container_post_tasks: []
 ```
 
-You can define your own pre- or post-tasks.  
-The individual scripts are executed before or after (re)starting the containers.  
-For example, you can use them to remove old container images, volumes or other things.  
 A few example scripts can be found under [`files`](./files):
 
 - `prune.sh`
@@ -59,10 +123,82 @@ A few example scripts can be found under [`files`](./files):
 - `remove_untagged_images.sh`
 - `parse_container_fact.sh`
 
+### `container_network` / `container_use_network`
 
-## container configuration
+It is possible to allow the respective containers to use one (or more) network.
 
-Simple example:
+```yaml
+container_use_network: true
+container_network:
+  - name: docker_network
+    subnet: 172.3.27.0/24
+    gateway: 172.3.27.2
+    iprange: 172.3.27.0/26
+
+  - name: monitoring
+    state: absent
+    enable_ipv6: false
+    subnet: 172.9.27.0/24
+    gateway: 172.9.27.2
+    iprange: 172.9.27.0/26    
+```
+
+### `container_comparisons`
+
+The default configuration for `docker_container.comparisons`.
+
+Allows you to specify how properties of existing containers are compared with module options to decide whether or not to recreate/update the container.
+
+[see also](https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html#parameter-comparisons)
+
+```yaml
+container_comparisons:
+  # '*': ignore
+  image: strict   # don't restart containers with older versions of the image
+  env: strict     # we want precisely this environment
+  labels: ignore
+```
+
+### `container_default_behavior`
+
+> In older versions of the `docker_container` module, various module options used to have default values.  
+> This caused problems with containers which use different values for these options.
+> 
+> The default value is now `no_defaults`.  
+> To restore the old behavior, set it to `compatibility`, which will ensure that the default values are 
+> used when the values are not explicitly specified by the user.
+> 
+> This affects the *auto_remove*, *detach*, *init*, *interactive*, *memory*, *paused*, *privileged*, *read_only* and *tty* options.
+
+[see also](https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html#parameter-container_default_behavior)
+
+```yaml
+container_default_behavior: "compatibility"
+```
+
+### `container_clean_update_fact`
+
+To enable the necessary restart of a container over an error, a corresponding facts is created.
+This fact can be evaluated in a post-task, for example.  
+By default, the created fact is removed after a successful run.
+For test and development purposes, the deletion can be deactivated.  
+
+> **Please note that containers may be restarted with each new run of the role!**
+
+```yaml
+container_clean_update_fact: true
+```
+
+### `container`
+
+A list with the definition of all containers served by this role.
+
+> **However, not all parameters of the [`docker_container`](https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html) module have been implemented!**
+
+For all supported parameters you should have a look at [`tasks/launch/launch_container.yml`](tasks/launch/launch_container.yml).
+
+
+#### Simple example:
 
 ```yaml
 container:
@@ -93,7 +229,14 @@ container:
         publisher.maxRecursionDepth: 600
 ```
 
-### environments
+More examples can be found here:
+
+- [`molecule/default`](molecule/default/group_vars/all/vars.yml)
+- [`molecule/multiple-containe`](molecule/multiple-container/group_vars/all/vars.yml)
+- [`molecule/update-container`](molecule/update-container/group_vars/all/vars.yml)
+- [`molecule/update-properties`](molecule/update-properties/group_vars/all/vars.yml)
+
+#### environments
 
 All `environments` entries are persisted to a separate environments file on the target system.
 
@@ -101,16 +244,17 @@ E.g. under `/opt/container/${CONTAINER_NAME}/container.env`
 
 The target directory for persistence can be customized via `container_env_directory`.
 
-### properties
+#### properties
 
 All `properties` entries are persisted to a separate properties file on the target system.
 
 E.g. under `/opt/container/${CONTAINER_NAME}/${CONTAINER_NAME}.properties`
 
+The target directory for persistence can be customized via `container_env_directory`.
 
-## volumes and mounts
+#### volumes and mounts
 
-### custom fileds for volumes
+##### custom fileds for volumes
 
 The idea behind the cutom_fields is to define corresponding rights in addition to the optional 
 creation of the directories.
@@ -130,7 +274,7 @@ The following variables can be used:
 - `mode`
 - `ignore`
 
-#### Example
+**Example**
 
 ```yaml
 
@@ -142,7 +286,7 @@ The following variables can be used:
       - testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
 ```
 
-### custom fields for mounts
+##### custom fields for mounts
 
 The `mounts` are similar to the `volumes`.
 Here, too, it is possible to create persistent directories in the host system via an extension `source_handling`.
@@ -151,6 +295,7 @@ Here, too, it is possible to create persistent directories in the host system vi
 With `create`, you can control whether the source directory should be created or not.
 The specification of `owner` and `group` enables the setting of access rights.
 
+**Example**
 
 ```yaml
 
@@ -175,6 +320,7 @@ The specification of `owner` and `group` enables the setting of access rights.
         target: /var/tmp/testing5
         type: bind 
 ```
+
 
 ## tests
 
@@ -211,6 +357,7 @@ make destroy -e TOX_SCENARIO=multiple-container
 ```
 
 
+
 ## filter_plugins
 
 Information of a `docker pull` via the `docker_container` module is cleaned by a filter plugin
@@ -235,6 +382,7 @@ and returns only relevant information.
     "image": "sha256:4dc04a576c0237b506a8e2b3fb015019b43d314b1eee11dcde06fef5b09bbdf4"
 }
 ```
+
 
 ## Author and License
 

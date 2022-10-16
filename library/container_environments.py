@@ -120,8 +120,8 @@ class ContainerEnvironments(object):
         if len(properties) == 0:
             return False
 
-        checksum_file = os.path.join(self.base_directory, name, ".{}.properties.checksum".format(name))
-        data_file     = os.path.join(self.base_directory, name, "{}.properties".format(name))
+        checksum_file = os.path.join(self.base_directory, name, f".{name}.properties.checksum")
+        data_file     = os.path.join(self.base_directory, name, f"{name}.properties")
 
         return self.__write_file(properties, "properties", data_file, checksum_file)
 

@@ -6,29 +6,42 @@ container_network:
     gateway: 172.3.27.2
     iprange: 172.3.27.0/26
 
-  - name: monitoring
-    state: absent
-    enable_ipv6: false
-    subnet: 172.9.27.0/24
-    gateway: 172.9.27.2
-    iprange: 172.9.27.0/26
+container_fail:
+  error_at_launch: false
 
-container:
-  - name: nginx-proxy
-    hostname: nginx-proxy
-    image: jwilder/nginx-proxy:0.9.3-alpine
-    published_ports:
-      - 8080:80
+container_pre_tasks:
+  - /usr/local/bin/list_all_images.sh
+
+container_post_tasks:
+  - /usr/local/bin/remove_untagged_images.sh
+  - /usr/local/bin/parse_container_fact.sh
+
+_images:
+  image_1: "busybox:latest"
+  image_2: "busybox:latest"
+  image_3: "hello-world:latest"
+  image_4: ""
+
+container: "{{
+  container_1 |
+  union(container_2 | default([])) |
+  union(container_3 | default([])) |
+  union(container_4 | default([])) }}"
+
+container_1:
+  - name: busybox-1
+    hostname: busybox-1
+    image: "{{ _images.image_1 }}"
     volumes:
       - /run/docker.sock:/tmp/docker.sock:ro
-      - /tmp/nginx:/tmp/nginx:ro
       - /dev/foo:/dev/foo:ro
-      - /tmp/testing3:/var/tmp/testing3:rw|{owner="999",group="1000"}
-      - /tmp/testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
-      - /tmp/testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
-      - /tmp/testing6:/var/tmp/testing6:ro|{owner="999",group="1000"}
+      - /tmp/busybox-1/nginx:/tmp/nginx:ro
+      - /tmp/busybox-1/testing3:/var/tmp/testing3:rw|{owner="1001",group="1000"}
+      - /tmp/busybox-1/testing4:/var/tmp/testing4|{owner="1001",mode="0700"}
+      - /tmp/busybox-1/testing5:/var/tmp/testing5|{owner="1001",mode="0700",ignore=True}
+      - /tmp/busybox-1/testing6:/var/tmp/testing6:ro|{owner="1001",group="1000"}
     mounts:
-      - source: /tmp/testing1
+      - source: /tmp/busybox-1/testing1
         target: /var/tmp/testing1
         type: bind
         source_handling:
@@ -36,15 +49,15 @@ container:
           owner: "1000"
           group: "1000"
           mode: "0750"
-      - source: /tmp/testing2
+      - source: /tmp/busybox-1/testing2
         target: /var/tmp/testing2
         type: bind
         source_handling:
           create: true
           owner: "800"
-          group: "999"
+          group: "800"
           mode: "0700"
-      - source: /opt/registry
+      - source: /opt/busybox-1/registry
         target: /opt/data
         type: bind
         source_handling:
@@ -59,18 +72,37 @@ container:
         source_handling:
           create: false
 
-
-  - name: whoami
-    image: jwilder/whoami
+container_2:
+  - name: busybox-2
+    hostname: busybox-2
+    image: "{{ _images.image_2 }}"
+    mounts:
+      - source: /tmp/busybox-2/testing1
+        target: /var/tmp/testing1
+        type: bind
+        source_handling:
+          create: true
+          owner: "1000"
+          group: "1000"
+          mode: "0750"
+      - source: /tmp/busybox-2/testing2
+        target: /var/tmp/testing2
+        type: bind
+        source_handling:
+          create: true
+          owner: "800"
+          group: "999"
+          mode: "0700"
     environments:
-      VIRTUAL_HOST: whoami.local
+      VIRTUAL_HOST: busybox-2.local
       # TEST_WORF: true
       DBA_HOST: database
       DBA_USER: username
 
+container_3:
   - name: hello-world
     hostname: hello-world
-    image: hello-world:latest
+    image: "{{ _images.image_3 }}"
     properties:
       publisher.maxRecursionDepth: 600
       # user and password for login to the staging serve
@@ -80,12 +112,5 @@ container:
       replicator.tmp_dir: 'var/tmp'
     environments:
       VIRTUAL_HOST: hello-world.local
-
-container_pre_tasks:
-  - /usr/local/bin/list_all_images.sh
-
-container_post_tasks:
-  - /usr/local/bin/remove_untagged_images.sh
-  - /usr/local/bin/parse_container_fact.sh
 
 ...
