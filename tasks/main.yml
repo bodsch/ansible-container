@@ -54,5 +54,7 @@
   ansible.builtin.file:
     path: /etc/ansible/facts.d/update_container.fact
     state: absent
+  when:
+    - container_clean_update_fact
 
 ...

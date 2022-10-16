@@ -56,26 +56,41 @@ def test_directory(host, get_vars):
     assert dir.is_directory
 
 
+@pytest.mark.parametrize("directories", [
+    "/tmp/busybox-1",
+    "/tmp/busybox-2",
+    # volumes
+    "/tmp/busybox-1/nginx",
+    "/tmp/busybox-1/testing3",
+    "/tmp/busybox-1/testing4",
+    "/tmp/busybox-1/testing6",
+    # mounts
+    "/tmp/busybox-1/testing1",
+    "/tmp/busybox-1/testing2",
+    "/opt/busybox-1/registry",
+    # mounts
+    "/tmp/busybox-2/testing1",
+    "/tmp/busybox-2/testing2",
+])
+def test_volumes_directories(host, directories):
+    dir = host.file(directories)
+    assert dir.is_directory
+
+
 @pytest.mark.parametrize("files", [
-    "nginx-proxy",
-    "whoami",
+    "busybox-1",
+    "busybox-2",
     "hello-world"
 ])
 def test_environments(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))
 
     for file in [
-        "{0}/{1}/container.env".format(dir.linked_to, files),
-        "{0}/{1}/.container.env.checksum".format(dir.linked_to, files)
+        f"{dir.linked_to}/{files}/container.env",
+        f"{dir.linked_to}/{files}/.container.env.checksum"
     ]:
         f = host.file(file)
         assert f.is_file
-
-    # f = host.file("{0}/{1}/container.env".format(dir.linked_to, files))
-    # assert f.is_file
-    #
-    # f = host.file("{0}/{1}/container.env".format(dir.linked_to, files))
-    # assert f.is_file
 
 
 @pytest.mark.parametrize("files", [
@@ -85,14 +100,8 @@ def test_properties(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))
 
     for file in [
-        "{0}/{1}/{1}.properties".format(dir.linked_to, files),
-        "{0}/{1}/.{1}.properties.checksum".format(dir.linked_to, files)
+        f"{dir.linked_to}/{files}/{files}.properties",
+        f"{dir.linked_to}/{files}/.{files}.properties.checksum"
     ]:
         f = host.file(file)
         assert f.is_file
-
-    # f = host.file("{0}/{1}/{1}.properties".format(dir.linked_to, files))
-    # assert f.is_file
-    #
-    # f = host.file("{0}/{1}/.{1}.properties.checksum".format(dir.linked_to, files))
-    # assert f.is_file

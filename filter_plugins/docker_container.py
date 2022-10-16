@@ -296,7 +296,7 @@ class FilterModule(object):
     def remove_custom_fields(self, data):
         """
         """
-        display.v(f"remove_custom_fields({data})")
+        # display.v(f"remove_custom_fields({data})")
         result = []
 
         if isinstance(data, list):
@@ -305,7 +305,7 @@ class FilterModule(object):
         else:
             result = data
 
-        display.v("return : {}".format(result))
+        # display.v("return : {}".format(result))
 
         return result
 
@@ -331,26 +331,61 @@ class FilterModule(object):
 
         return result
 
-    def reporting(self, data):
+    def reporting(self, data, report_for):
         """
         """
+        states = []
         result = []
 
-        if (isinstance(data, list)):
-            for item in data:
+        if isinstance(data, dict):
+            results = data.get("results", [])
+
+            for r in results:
+                failed = r.get('failed', False)
+                changed = r.get('changed', False)
+
+                if report_for == "failed" and failed:
+                    states.append(r)
+
+                if report_for == "changed" and changed:
+                    states.append(r)
+
+            # display.v(f"states: => {len(states)}")
+
+            for item in states:
+                """
+                """
                 data = item.get('item', {})
                 name = data.get('name', None)
                 hostname = data.get('hostname', None)
                 image = data.get('image', None)
+                msg = item.get('msg', None)
 
-                if hostname is not None:
-                    result.append(hostname)
-                elif name is not None:
-                    result.append(name)
-                else:
-                    result.append(image)
+                # display.v(f" - name     {name}")
+                # display.v(f" - hostname {hostname}")
+                # display.v(f" - image    {image}")
+                # display.v(f" - msg      {msg}")
 
-        display.v("return : {}".format(result))
+                if report_for == "changed":
+                    if hostname:
+                        result.append(hostname)
+                    elif name:
+                        result.append(name)
+                    else:
+                        result.append(image)
+
+                if report_for == "failed":
+                    res = {}
+                    if hostname:
+                        res[hostname] = msg
+                    elif name:
+                        res[name] = msg
+                    else:
+                        res[image] = msg
+
+                    result.append(res)
+
+        # display.v(f"result: => {result}")
 
         return result
 

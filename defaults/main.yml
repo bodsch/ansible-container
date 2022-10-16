@@ -1,6 +1,11 @@
 ---
 
-container_reporting_changes: true
+container_reporting:
+  changes: true
+  failed: true
+
+container_fail:
+  error_at_launch: true
 
 container_env_directory: /opt/container
 
@@ -20,3 +25,15 @@ container_network: []
 #     subnet: 172.3.27.0/24
 #     gateway: 172.3.27.2
 #     iprange: 172.3.27.0/26
+
+# see: https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html#parameter-comparisons
+container_comparisons:
+  # '*': ignore
+  image: strict   # don't restart containers with older versions of the image
+  env: strict     # we want precisely this environment
+  labels: ignore
+
+container_default_behavior: "compatibility"
+container_clean_update_fact: true
+
+...

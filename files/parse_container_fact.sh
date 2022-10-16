@@ -7,11 +7,30 @@ then
 
   data=$(bash "${FACTS_FILE}")
 
-  image=$(echo "${data}" | jq -r '.update_needed[] | select(.recreate).image')
-  name=$(echo "${data}" | jq -r '.update_needed[] | select(.recreate).name')
+  recreate=$(echo "${data}" | jq -r '.update_needed[] | select(.recreate)')
 
-  echo ""
-  echo "special update hook for:"
-  echo "  - ${name}"
+  # image=$(echo "${recreate}" | jq -r '.image')
+  names=$(echo "${recreate}"  | jq -r '.name')
+
+  if [ -n "${names}" ]
+  then
+    echo ""
+    echo "special update hook for:"
+
+    for n in ${names}
+    do
+      echo "  - ${n}"
+
+      if [ "${n}" = "busybox-2" ]
+      then
+        echo "cat environments:"
+        if [ -f "/opt/container/${n}/container.env" ]
+        then
+          cat "/opt/container/${n}/container.env"
+        fi
+      fi
+    done
+  fi
+
 
 fi
