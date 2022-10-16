@@ -106,6 +106,7 @@
   ansible.builtin.fail:
     msg: "{{ failed }}"
   when:
+    - failed | default([]) | count > 0
     - container_fail.error_at_launch | default('true')
 
 ...
