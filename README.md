@@ -134,6 +134,13 @@ container_network:
     subnet: 172.3.27.0/24
     gateway: 172.3.27.2
     iprange: 172.3.27.0/26
+
+  - name: monitoring
+    state: absent
+    enable_ipv6: false
+    subnet: 172.9.27.0/24
+    gateway: 172.9.27.2
+    iprange: 172.9.27.0/26    
 ```
 
 ### `container_comparisons`

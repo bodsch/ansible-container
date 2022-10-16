@@ -6,6 +6,16 @@ container_network:
     gateway: 172.3.27.2
     iprange: 172.3.27.0/26
 
+container_fail:
+  error_at_launch: false
+
+container_pre_tasks:
+  - /usr/local/bin/list_all_images.sh
+
+container_post_tasks:
+  - /usr/local/bin/remove_untagged_images.sh
+  - /usr/local/bin/parse_container_fact.sh
+
 _images:
   image_1: "busybox:latest"
   image_2: "busybox:latest"
@@ -102,16 +112,5 @@ container_3:
       replicator.tmp_dir: 'var/tmp'
     environments:
       VIRTUAL_HOST: hello-world.local
-
-container_pre_tasks:
-  - /usr/local/bin/list_all_images.sh
-
-container_post_tasks:
-  - /usr/local/bin/remove_untagged_images.sh
-  - /usr/local/bin/parse_container_fact.sh
-
-container_reporting_changes: true
-container_fail_changes: false
-container_clean_update_fact: true
 
 ...
