@@ -80,7 +80,7 @@ def test_volumes_directories(host, directories):
 @pytest.mark.parametrize("files", [
     "busybox-1",
     "busybox-2",
-    "hello-world"
+    "hello-world-1"
 ])
 def test_environments(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))
@@ -94,7 +94,7 @@ def test_environments(host, get_vars, files):
 
 
 @pytest.mark.parametrize("files", [
-    "hello-world"
+    "hello-world-1"
 ])
 def test_properties(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))

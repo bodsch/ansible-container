@@ -125,7 +125,7 @@ container_3:
       # replicator.domain: ''
       replicator.tmp_dir: 'var/tmp'
     environments:
-      VIRTUAL_HOST: hello-world.local
+      VIRTUAL_HOST: hello-world-1.local
 
 container_4:
   - name: busybox-4
