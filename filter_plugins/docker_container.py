@@ -23,8 +23,10 @@ class FilterModule(object):
             'compare_dict': self.filter_compare_dict,
             'container_names': self.filter_names,
             'container_images': self.filter_images,
+            'container_state': self.container_state,
             'container_volumes': self.filter_volumes,
             'container_mounts': self.filter_mounts,
+            'container_ignore_state': self.container_ignore_state,
             'remove_values': self.remove_values,
             'remove_custom_fields': self.remove_custom_fields,
             'remove_source_handling': self.remove_source_handling,
@@ -136,6 +138,39 @@ class FilterModule(object):
         """
         """
         return self._get_keys_from_dict(data, 'image')
+
+    def container_state(self, data, state, return_value):
+        """
+            state can be
+                - absent
+                - present
+                - stopped
+                - started ← (default)
+        """
+        # display.v(f"container_state(self, data, {state}, {return_value})")
+
+        result = []
+        _defaults_present = ['started', 'present']
+        _defaults_absent  = ['stopped', 'absent']
+        state_filter = []
+
+        if state in _defaults_present:
+            state_filter = _defaults_present
+        else:
+            state_filter = _defaults_absent
+
+        for i in data:
+            if isinstance(i, dict):
+                _state = i.get('state', 'started')
+                image  = i.get(return_value, None)
+
+                if _state in state_filter:
+                    if image:
+                        result.append(image)
+
+        display.v(f"  = result {result}")
+
+        return result
 
     def remove_values(self, data, values):
         """
@@ -293,6 +328,17 @@ class FilterModule(object):
 
         return result
 
+    def container_ignore_state(self, data, ignore_states):
+        """
+        """
+        display.v(f"container_ignore_state(self, data, {ignore_states})")
+
+        _data = data.copy()
+
+        result = [i for i in _data if not (i.get('state', 'started') in ignore_states)]
+
+        return result
+
     def remove_custom_fields(self, data):
         """
         """
@@ -394,9 +440,9 @@ class FilterModule(object):
         """
         result = []
         for i in dictionary:
-            if (isinstance(i, dict)):
+            if isinstance(i, dict):
                 k = i.get(key, None)
-                if (k):
+                if k:
                     result.append(k)
 
         return result
@@ -405,7 +451,7 @@ class FilterModule(object):
         """
         """
         for i in dictionary:
-            if (isinstance(i, dict)):
+            if isinstance(i, dict):
                 _ = i.pop(key, None)
 
         return dictionary

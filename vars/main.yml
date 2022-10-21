@@ -15,8 +15,8 @@ container_registry_default:
   username: ''
   password: ''
 
-_container_image_pull_information: {}
-_container_local_image_information: {}
+_container_images_information_pulled: {}
+_container_images_state_present: []
 
 container_changed: []
 
