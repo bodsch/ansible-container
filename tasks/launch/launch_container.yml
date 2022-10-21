@@ -78,7 +78,7 @@
     working_dir: "{{ item.working_dir | default(omit) }}"
   register: create_container_instances
   ignore_errors: true
-  loop: "{{ container }}"
+  loop: "{{ container | container_ignore_state(['present']) }}"
   loop_control:
     label: "{{ item.name.ljust(12) }} - hostname: {{ item.name }} - image: {{ item.image }}"
   tags:

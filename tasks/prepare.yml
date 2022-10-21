@@ -146,6 +146,10 @@
 - name: flush handlers
   ansible.builtin.meta: flush_handlers
 
+- name: get container states
+  ansible.builtin.set_fact:
+    _container_images_state_present: "{{ container | container_state('present', 'image') }}"
+
 - name: make sure ansible local facts directory exists
   become: true
   ansible.builtin.file:

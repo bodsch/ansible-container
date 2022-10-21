@@ -6,18 +6,18 @@
     source: pull
     force_tag: true
     force_source: true
-  register: _container_image_pull_information
+  register: _container_images_information_pulled
   ignore_errors: false
-  loop: "{{ container_images }}"
+  loop: "{{ _container_images_state_present }}"
   tags:
     - container_pull
 
 - name: update needed | true  # noqa no-handler
   ansible.builtin.set_fact:
     container_update_needed: true
-    container_changed: "{{ _container_image_pull_information | changed }}"
+    container_changed: "{{ _container_images_information_pulled | changed }}"
   when:
-    - _container_image_pull_information.changed
+    - _container_images_information_pulled.changed
   tags:
     - container_pull
 

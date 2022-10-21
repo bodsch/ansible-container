@@ -20,13 +20,24 @@ _images:
   image_1: "busybox:latest"
   image_2: "busybox:latest"
   image_3: "hello-world:latest"
-  image_4: ""
+  image_4: "busybox:latest"
+  image_5: "busybox:latest"
+
+_container_defaults: &CONTAINER_DEFAULTS
+  restart_policy: always
+  labels:
+    watchdog: "false"
+  log_options:
+    labels: "service"
+    max-size: "1m"
+    max-file: "2"
 
 container: "{{
   container_1 |
   union(container_2 | default([])) |
   union(container_3 | default([])) |
-  union(container_4 | default([])) }}"
+  union(container_4 | default([])) |
+  union(container_5 | default([])) }}"
 
 container_1:
   - name: busybox-1
@@ -76,6 +87,7 @@ container_2:
   - name: busybox-2
     hostname: busybox-2
     image: "{{ _images.image_2 }}"
+    << : *CONTAINER_DEFAULTS
     mounts:
       - source: /tmp/busybox-2/testing1
         target: /var/tmp/testing1
@@ -100,9 +112,11 @@ container_2:
       DBA_USER: username
 
 container_3:
-  - name: hello-world
-    hostname: hello-world
+  - name: hello-world-1
+    # state: stopped
+    hostname: hello-world-1
     image: "{{ _images.image_3 }}"
+    << : *CONTAINER_DEFAULTS
     properties:
       publisher.maxRecursionDepth: 600
       # user and password for login to the staging serve
@@ -112,5 +126,25 @@ container_3:
       replicator.tmp_dir: 'var/tmp'
     environments:
       VIRTUAL_HOST: hello-world.local
+
+container_4:
+  - name: busybox-4
+    state: absent
+    hostname: busybox-4
+    image: "{{ _images.image_4 }}"
+    << : *CONTAINER_DEFAULTS
+    environments:
+      VIRTUAL_HOST: busybox-4.local
+
+container_5:
+  - name: busybox-5
+    state: present
+    hostname: busybox-5
+    image: "{{ _images.image_5 }}"
+    << : *CONTAINER_DEFAULTS
+    restart: "false"
+    restart_policy: "no"
+    environments:
+      VIRTUAL_HOST: busybox-5.local
 
 ...
