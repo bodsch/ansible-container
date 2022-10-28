@@ -1,7 +1,7 @@
 ---
 
 - name: "get container informations from host '{{ ansible_play_hosts[0] }}'"
-  bodsch.container.docker_container_info:
+  docker_container_info:
     name: "{{ item.name }}"
   register: container_info
   no_log: true
