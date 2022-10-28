@@ -27,6 +27,7 @@ class FilterModule(object):
             'container_volumes': self.filter_volumes,
             'container_mounts': self.filter_mounts,
             'container_ignore_state': self.container_ignore_state,
+            'container_filter_by': self.container_filter_by,
             'remove_values': self.remove_values,
             'remove_custom_fields': self.remove_custom_fields,
             'remove_source_handling': self.remove_source_handling,
@@ -337,7 +338,46 @@ class FilterModule(object):
 
         result = [i for i in _data if not (i.get('state', 'started') in ignore_states)]
 
+        display.v(f" = result: {result}")
+
         return result
+
+    def container_filter_by(self, data, filter_by, filter_values):
+        """
+        :param data:
+        :param filter_by:
+        :return:
+        """
+
+        display.v(f"container_filter_by(self, data, {filter_by}, {filter_values})")
+
+        if filter_by not in ["name", "hostname", "image"]:
+            return data
+
+        d = data.copy()
+
+        display.v(f"  type {type(d)}")
+
+        for entry in d:
+            if filter_by == "name":
+                name = entry.get("name")
+                if name not in filter_values:
+                    display.v(f" = drop: {name}")
+                    data.remove(entry)
+
+            elif filter_by == "hostname":
+                hostname = entry.get("hostname")
+                if hostname not in filter_values:
+                    display.v(f" = drop: {hostname}")
+                    data.remove(entry)
+
+            elif filter_by == "image":
+                image = entry.get("image")
+                if image not in filter_values:
+                    display.v(f" = drop: {image}")
+                    data.remove(entry)
+
+        return data
 
     def remove_custom_fields(self, data):
         """
