@@ -33,6 +33,11 @@ container_comparisons:
   env: strict     # we want precisely this environment
   labels: ignore
 
+# filter by ["name", "hostname", "image"]
+container_filter:
+  by: ""
+  names: []
+
 container_default_behavior: "compatibility"
 container_clean_update_fact: true
 

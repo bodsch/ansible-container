@@ -57,7 +57,13 @@ container_comparisons:
   image: strict   # don't restart containers with older versions of the image
   env: strict     # we want precisely this environment
   labels: ignore
-
+  
+# filter container by 
+container_filter:
+  # ["name", "hostname", "image"]
+  by: ""
+  names: []
+  
 container_default_behavior: "compatibility"
 container_clean_update_fact: true
 ```
@@ -157,6 +163,20 @@ container_comparisons:
   image: strict   # don't restart containers with older versions of the image
   env: strict     # we want precisely this environment
   labels: ignore
+```
+
+### `container_filter`
+
+In a large environment, there are many containers that need to be considered during a run.
+
+To reduce the runtime, or to roll out only certain containers, these can be filtered.
+The filter criteria available here are `name`, `hostname` and `image`.
+
+```yaml
+container_filter:
+  # ["name", "hostname", "image"]
+  by: ""
+  names: []
 ```
 
 ### `container_default_behavior`

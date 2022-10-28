@@ -18,6 +18,16 @@
         - default.yaml
       skip: true
 
+- name: filter container by {{ container_filter.by }}
+  ansible.builtin.set_fact:
+    container: "{{ container | container_filter_by(container_filter.by, container_filter.names) }}"
+  when:
+    - container_filter is defined
+    - container_filter.by is defined
+    - container_filter.by in ["name", "hostname", "image"]
+    - container_filter.names is defined
+    - container_filter.names | count > 0
+
 - name: define some container facts
   ansible.builtin.set_fact:
     container_names: "{{ container | container_names }}"

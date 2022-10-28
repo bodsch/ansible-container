@@ -16,6 +16,11 @@ container_post_tasks:
   - /usr/local/bin/remove_untagged_images.sh
   - /usr/local/bin/parse_container_fact.sh
 
+container_filter:
+  by: "name"
+  names:
+    - busybox-2
+
 _images:
   image_1: "busybox:latest"
   image_2: "busybox:latest"
