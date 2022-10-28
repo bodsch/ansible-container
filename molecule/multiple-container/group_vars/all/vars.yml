@@ -85,7 +85,7 @@ container_1:
 
 container_2:
   - name: busybox-2
-    << : *CONTAINER_DEFAULTS
+    <<: *CONTAINER_DEFAULTS
     hostname: busybox-2
     image: "{{ _images.image_2 }}"
     mounts:
@@ -113,7 +113,7 @@ container_2:
 
 container_3:
   - name: hello-world-1
-    << : *CONTAINER_DEFAULTS
+    <<: *CONTAINER_DEFAULTS
     # state: stopped
     hostname: hello-world-1
     image: "{{ _images.image_3 }}"
@@ -129,7 +129,7 @@ container_3:
 
 container_4:
   - name: busybox-4
-    << : *CONTAINER_DEFAULTS
+    <<: *CONTAINER_DEFAULTS
     state: absent
     hostname: busybox-4
     image: "{{ _images.image_4 }}"
@@ -138,7 +138,7 @@ container_4:
 
 container_5:
   - name: busybox-5
-    << : *CONTAINER_DEFAULTS
+    <<: *CONTAINER_DEFAULTS
     state: present
     hostname: busybox-5
     image: "{{ _images.image_5 }}"
