@@ -1,7 +1,7 @@
 ---
 
 container_packages:
-    - openssl
-    - jq
+  - openssl
+  - jq
 
 ...
