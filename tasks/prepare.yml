@@ -67,8 +67,6 @@
 
     - name: clean apt cache
       ansible.builtin.command: apt-get clean
-      args:
-        warn: false
       when:
         - _installed.changed
 
