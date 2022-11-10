@@ -3,8 +3,6 @@
 - name: execute pre tasks
   ansible.builtin.command: |
     {{ item }}
-  args:
-    warn: false
   changed_when: false
   register: _pre_task_output
   loop: "{{ container_pre_tasks }}"
