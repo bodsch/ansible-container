@@ -45,6 +45,7 @@
     output_logs: true
     privileged: "{{ item.privileged | default(omit) }}"
     published_ports: "{{ item.published_ports | default(omit) }}"
+    read_only: "{{ item.read_only | default(omit) }}"
     recreate: "{{ item.recreate | default(omit) }}"  # <==  RESTARTS container after EVERY ansible run
     restart: "{{ item.restart | default(omit) }}"
     restart_policy: "{{ item.restart_policy | default('on-failure') }}"
