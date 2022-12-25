@@ -93,7 +93,7 @@ def test_properties(host, get_vars, files):
 
     for file in [
         f"{dir.linked_to}/{files}/{files}.properties",
-        f"{dir.linked_to}/{files}/.{files}.properties.checksum"
+        f"{dir.linked_to}/{files}/{files}.properties.checksum"
     ]:
         f = host.file(file)
         assert f.is_file
