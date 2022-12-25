@@ -23,10 +23,10 @@
 
 - name: created environnments or properties
   ansible.builtin.debug:
-    msg: "{{ _container_data.state }}"
+    msg: "{{ _container_data.msg }}"
   when:
     - _container_data is defined
-    - _container_data.state is defined
+    - _container_data.msg is defined
     - _container_data.changed
 
 ...

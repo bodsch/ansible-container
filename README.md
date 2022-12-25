@@ -4,13 +4,15 @@
 
 ansible role for docker deployment of generic container applications
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/bodsch/ansible-container/CI)][ci]
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-container/main.yml?branch=main)][ci]
 [![GitHub issues](https://img.shields.io/github/issues/bodsch/ansible-container)][issues]
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/bodsch/ansible-container)][releases]
+[![Ansible Quality Score](https://img.shields.io/ansible/quality/50067?label=role%20quality)][quality]
 
 [ci]: https://github.com/bodsch/ansible-container/actions
 [issues]: https://github.com/bodsch/ansible-container/issues?q=is%3Aopen+is%3Aissue
 [releases]: https://github.com/bodsch/ansible-container/releases
+[quality]: https://galaxy.ansible.com/bodsch/container
 
 
 ## Requirements & Dependencies
@@ -70,8 +72,8 @@ container_clean_update_fact: true
 
 ### `container_reporting`
 
-If there is a change in the started containers, a report can be issued.
-This can concern both changes and failures.
+If there is a change in the started containers, a report can be issued.  
+This can concern both `changes` and `failures`.
 
 ```yaml
 container_reporting:
@@ -99,7 +101,7 @@ container_env_directory: /opt/container
 
 ### `container registry`
 
-Configures a container registry.
+Configures a container registry.  
 If `host`, `username` and `password` are defined, a corresponding login to the registry is also carried out.
 
 ```yaml
@@ -146,13 +148,12 @@ container_network:
     enable_ipv6: false
     subnet: 172.9.27.0/24
     gateway: 172.9.27.2
-    iprange: 172.9.27.0/26    
+    iprange: 172.9.27.0/26
 ```
 
 ### `container_comparisons`
 
-The default configuration for `docker_container.comparisons`.
-
+The default configuration for `docker_container.comparisons`.  
 Allows you to specify how properties of existing containers are compared with module options to decide whether or not to recreate/update the container.
 
 [see also](https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html#parameter-comparisons)
@@ -167,8 +168,7 @@ container_comparisons:
 
 ### `container_filter`
 
-In a large environment, there are many containers that need to be considered during a run.
-
+In a large environment, there are many containers that need to be considered during a run.  
 To reduce the runtime, or to roll out only certain containers, these can be filtered.
 The filter criteria available here are `name`, `hostname` and `image`.
 
@@ -178,6 +178,24 @@ container_filter:
   by: ""
   names: []
 ```
+
+**For example:**
+
+```yaml
+container_filter:
+  by: hostname
+  names:
+    - hello-world-1
+```
+or
+
+```yaml
+container_filter:
+  by: image
+  names:
+    - busybox:latest
+```
+
 
 ### `container_default_behavior`
 
@@ -255,6 +273,7 @@ More examples can be found here:
 - [`molecule/multiple-containe`](molecule/multiple-container/group_vars/all/vars.yml)
 - [`molecule/update-container`](molecule/update-container/group_vars/all/vars.yml)
 - [`molecule/update-properties`](molecule/update-properties/group_vars/all/vars.yml)
+- [`molecule/many-properties`](molecule/many-properties/group_vars/all/vars.yml)
 
 #### environments
 
@@ -271,6 +290,31 @@ All `properties` entries are persisted to a separate properties file on the targ
 E.g. under `/opt/container/${CONTAINER_NAME}/${CONTAINER_NAME}.properties`
 
 The target directory for persistence can be customized via `container_env_directory`.
+
+Since version 2.3, several separate properties files can be created per container.
+To do this, a list must be created under `property_files`.
+
+> Both `properties` and `property_files` can be used in parallel.
+
+**For example:**
+
+```yaml
+
+    property_files:
+      - name: publisher.properties
+        properties:
+          # user and password for login to the staging serve
+          replicator.user: 'replicator'
+          replicator.password: 'replicator'
+          # replicator.domain: ''
+          replicator.tmp_dir: 'var/tmp'
+          #
+          publisher.maxRecursionDepth: 200
+      - name: database.properties
+```
+
+If no `properties` is defined here, the associated file is deleted.
+
 
 #### volumes and mounts
 
@@ -360,13 +404,8 @@ make -e TOX_ANSIBLE=ansible_6.4
 make destroy -e TOX_ANSIBLE=ansible_6.4
 ```
 
-Currently the following Ansible versions are configured:
+The currently testable Ansible versions are defined in [`tox.ini`](./tox.ini).
 
-- 4.10
-- 5.1
-- 5.2
-- 6.1
-- 6.4
 
 Below `molecule`, various tests are provided. If none is explicitly specified, `default` is used.  
 To call a special test, you can define it via `-e TOX_SCENARIO=$TEST`.
@@ -376,33 +415,7 @@ make -e TOX_SCENARIO=multiple-container
 make destroy -e TOX_SCENARIO=multiple-container
 ```
 
-
-
-## filter_plugins
-
-Information of a `docker pull` via the `docker_container` module is cleaned by a filter plugin
-and returns only relevant information.
-
-- container
-- created
-- interne Id
-- image prüfsumme
-
-```yaml
-"content-management-server": {
-    "container": "xxx.dkr.ecr.eu-central-1.amazonaws.com/content-server:latest",
-    "created": "2020-09-10T07:01:24.482766886Z",
-    "id": "baaa15ee39248ecf2552133ea84c8abe02b6323ee04c2792de73117fa2b8dffb",
-    "image": "sha256:e791a446e2c1ed9e5f65c0edb1ca488466caecb648a77331701111f0d9b454b7"
-},
-"workflow-server": {
-    "container": "xxx.dkr.ecr.eu-central-1.amazonaws.com/workflow-server:latest",
-    "created": "2020-09-10T07:01:19.379408285Z",
-    "id": "b1028d8c0ee9c8090fb17031435b6ce6f93aafde22e973977a1ae2cc6ce2ea6c",
-    "image": "sha256:4dc04a576c0237b506a8e2b3fb015019b43d314b1eee11dcde06fef5b09bbdf4"
-}
-```
-
+---
 
 ## Author and License
 

@@ -15,6 +15,7 @@ from ansible.module_utils.basic import AnsibleModule
 class ContainerDirectories(object):
     """
     """
+
     def __init__(self, module):
         """
         """
