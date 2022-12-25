@@ -65,10 +65,22 @@
         state: present
       register: _installed
 
-    - name: clean apt cache
-      ansible.builtin.command: apt-get clean
+    - name: update apt cache
       when:
         - _installed.changed
+      block:
+        - name: clean apt cache
+          ansible.builtin.command: |
+            apt-get clean
+          register: apt_clean
+          changed_when: apt_clean.rc != 0
+          failed_when: apt_clean.rc != 0
+          when: "ansible_version.full is version_compare('2.13', '<')"
+
+        - name: clean apt cache
+          ansible.builtin.apt:
+            clean: true
+          when: "ansible_version.full is version_compare('2.13', '>=')"
 
 - name: python support
   when:
@@ -119,8 +131,8 @@
   notify:
     - created application directories
 
-- name: flush handlers
-  ansible.builtin.meta: flush_handlers
+# - name: flush handlers
+#   ansible.builtin.meta: flush_handlers
 
 - name: persist application docker environnments or properties
   become: true
@@ -138,8 +150,8 @@
   when:
     - _container_data.changed
 
-- name: flush handlers
-  ansible.builtin.meta: flush_handlers
+# - name: flush handlers
+#   ansible.builtin.meta: flush_handlers
 
 - name: create container volumes and mountpoints
   become: true
