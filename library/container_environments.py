@@ -86,8 +86,8 @@ class ContainerEnvironments(object):
             if defined_environments:
                 _ = c.pop("environments")
 
-                if e_changed:
-                    state.append("container.env")
+            if e_changed:
+                state.append("container.env")
 
             if defined_properties or defined_property_files:
                 """
@@ -157,13 +157,13 @@ class ContainerEnvironments(object):
         checksum_file = os.path.join(self.base_directory, container_name, "container.env.checksum")
         data_file     = os.path.join(self.base_directory, container_name, "container.env")
 
-        if len(environments) == 0:
-            if os.path.exists(data_file):
-                os.remove(data_file)
-            if os.path.exists(checksum_file):
-                os.remove(checksum_file)
-
-            return False
+        # if len(environments) == 0:
+        #     if os.path.exists(data_file):
+        #         os.remove(data_file)
+        #     if os.path.exists(checksum_file):
+        #         os.remove(checksum_file)
+        #
+        #     return False
 
         changed, new_checksum, old_checksum = self.__has_changed(data_file, environments)
 

@@ -2,12 +2,12 @@
 
 _container_defaults: &CONTAINER_DEFAULTS
   restart_policy: always
-  labels:
-    watchdog: "false"
-  log_options:
-    labels: "service"
-    max-size: "1m"
-    max-file: "2"
+  # labels:
+  #   watchdog: "false"
+  # log_options:
+  #   labels: "service"
+  #   max-size: "1m"
+  #   max-file: "2"
 
 _images:
   image_1: "busybox:latest"

@@ -78,8 +78,9 @@ def test_volumes_directories(host, directories):
 
 
 @pytest.mark.parametrize("files", [
-    "busybox-1",
     "busybox-2",
+    "busybox-4",
+    "busybox-5",
     "hello-world-1"
 ])
 def test_environments(host, get_vars, files):
