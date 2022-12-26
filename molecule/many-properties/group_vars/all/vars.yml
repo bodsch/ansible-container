@@ -57,6 +57,3 @@ container_3:
       VIRTUAL_HOST: hello-world-1.local
 
 ...
-
-
-
