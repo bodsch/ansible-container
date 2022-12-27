@@ -1,5 +1,8 @@
 ---
 
+container_fail:
+  error_at_launch: false
+
 container:
   - name: busybox
     hostname: busybox

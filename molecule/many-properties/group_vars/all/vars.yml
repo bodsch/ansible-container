@@ -1,5 +1,8 @@
 ---
 
+container_fail:
+  error_at_launch: false
+
 _container_defaults: &CONTAINER_DEFAULTS
   restart_policy: always
   # labels:
