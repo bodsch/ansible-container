@@ -65,7 +65,7 @@
         state: present
       register: _installed
 
-    - name: update apt cache
+    - name: update apt cache  # noqa no-handler
       when:
         - _installed.changed
       block:

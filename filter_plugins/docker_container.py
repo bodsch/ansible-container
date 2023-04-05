@@ -16,7 +16,6 @@ class FilterModule(object):
     """
       ansible filter
     """
-
     def filters(self):
         return {
             'container_hashes': self.filter_hashes,
@@ -348,7 +347,6 @@ class FilterModule(object):
         :param filter_by:
         :return:
         """
-
         display.v(f"container_filter_by(self, data, {filter_by}, {filter_values})")
 
         if filter_by not in ["name", "hostname", "image"]:

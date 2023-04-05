@@ -19,6 +19,18 @@ ansible role for docker deployment of generic container applications
 
 - pip module `ruamel.yaml`
 
+Ansible Collections
+
+- [bodsch.core](https://github.com/bodsch/ansible-collection-core)
+
+```bash
+ansible-galaxy collection install bodsch.core
+```
+or
+```bash
+ansible-galaxy collection install --requirements-file collections.yml
+```
+
 
 ### Operating systems
 
@@ -31,7 +43,7 @@ Tested on
 
 ## usage
 
-```
+```yaml
 container_reporting:
   changes: true
   failed: true
@@ -154,7 +166,8 @@ container_network:
 ### `container_comparisons`
 
 The default configuration for `docker_container.comparisons`.  
-Allows you to specify how properties of existing containers are compared with module options to decide whether or not to recreate/update the container.
+Allows you to specify how properties of existing containers are compared with module options to 
+decide whether or not to recreate/update the container.
 
 [see also](https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html#parameter-comparisons)
 
@@ -355,7 +368,6 @@ The following variables can be used:
 The `mounts` are similar to the `volumes`.
 Here, too, it is possible to create persistent directories in the host system via an extension `source_handling`.
 
-
 With `create`, you can control whether the source directory should be created or not.
 The specification of `owner` and `group` enables the setting of access rights.
 
@@ -425,4 +437,4 @@ make destroy -e TOX_SCENARIO=multiple-container
 
 [Apache](LICENSE)
 
-`FREE SOFTWARE, HELL YEAH!`
+**FREE SOFTWARE, HELL YEAH!**

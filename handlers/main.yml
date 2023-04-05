@@ -1,13 +1,13 @@
 ---
 
-- name: created application directories
+- name: created application directories  # noqa no-handler
   ansible.builtin.debug:
     msg: "{{ _created_directories.created_directories }}"
   when:
     - _created_directories.changed
     - _created_directories.created_directories is defined
 
-- name: created container volumes and mountpoints
+- name: created container volumes and mountpoints  # noqa no-handler
   ansible.builtin.debug:
     msg: "{{ _created_directories.created_directories }}"
   when:

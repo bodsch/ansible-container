@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# (c) 2021, Bodo Schulz <bodo@boone-schulz.de>
-# BSD 2-clause (see LICENSE or https://opensource.org/licenses/BSD-2-Clause)
+# (c) 2021-2023, Bodo Schulz <bodo@boone-schulz.de>
+# Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
+# SPDX-License-Identifier: Apache-2.0
 
 from __future__ import absolute_import, division, print_function
 
 import grp
-# import json
 import os
 import pwd
 from ansible.module_utils.basic import AnsibleModule
 from ruamel.yaml import YAML
+from ansible_collections.bodsch.core.plugins.module_utils.lists import compare_two_lists
+from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory_tree
 
 
 class ContainerMounts(object):
     """
     """
-
     def __init__(self, module):
         """
         """
@@ -79,10 +80,12 @@ class ContainerMounts(object):
             )
 
         current_state = self.__analyse_directories(full_list)
-        self.__create_directories(full_list, current_state)
+        create_directory_tree(full_list, current_state)
         final_state = self.__analyse_directories(full_list)
 
-        equal_lists, diff = self.__compare_two_lists(list1=current_state, list2=final_state)
+        equal_lists, diff, error_msg = compare_two_lists(list1=current_state, list2=final_state)
+
+        self.module.log(f"  error_msg: {error_msg}")
 
         # TODO
         # remove custom fields from 'volumes'
@@ -90,7 +93,7 @@ class ContainerMounts(object):
             result['msg'] = "changed or created directories"
             msg = ""
             for i in diff:
-                msg += "- {0}\n".format(i)
+                msg += f"- {i}\n"
             result['created_directories'] = msg
 
         if len(diff) == 0:
@@ -292,143 +295,52 @@ class ContainerMounts(object):
 
         return result
 
-    def __create_directories(self, directory_tree, current_state):
-        """
-        """
-        for entry in directory_tree:
-            """
-            """
-            source = entry.get('source')
-            source_handling = entry.get('source_handling', {})
-            force_create = source_handling.get('create', None)
-            force_owner = source_handling.get('owner', None)
-            force_group = source_handling.get('group', None)
-            force_mode = source_handling.get('mode', None)
-
-            curr = self.__find_in_list(current_state, source)
-
-            current_owner = curr[source].get('owner')
-            current_group = curr[source].get('group')
-
-            # create directory
-            if force_create is not None and not force_create:
-                pass
-            else:
-                try:
-                    os.makedirs(source, exist_ok=True)
-                except FileExistsError:
-                    pass
-
-            # change mode
-            if os.path.isdir(source) and force_mode is not None:
-                if isinstance(force_mode, int):
-                    mode = int(str(force_mode), base=8)
-                if isinstance(force_mode, str):
-                    mode = int(force_mode, base=8)
-
-                os.chmod(source, mode)
-
-            # change ownership
-            if force_owner is not None or force_group is not None:
-                """
-                """
-                if os.path.isdir(source):
-                    """
-                    """
-                    if force_owner is not None:
-                        try:
-                            force_owner = pwd.getpwnam(str(force_owner)).pw_uid
-                        except KeyError:
-                            force_owner = int(force_owner)
-                            pass
-                    elif current_owner is not None:
-                        force_owner = current_owner
-                    else:
-                        force_owner = 0
-
-                    if force_group is not None:
-                        try:
-                            force_group = grp.getgrnam(str(force_group)).gr_gid
-                        except KeyError:
-                            force_group = int(force_group)
-                            pass
-                    elif current_group is not None:
-                        force_group = current_group
-                    else:
-                        force_group = 0
-
-                    os.chown(source, int(force_owner), int(force_group))
-
-    def __find_in_list(self, list, value):
-        """
-        """
-        for entry in list:
-            for k, v in entry.items():
-                if k == value:
-                    return entry
-
-        return None
-
-    def __compare_two_lists(self, list1: list, list2: list):
-        """
-        Compare two lists and logs the difference.
-        :param list1: first list.
-        :param list2: second list.
-        :return:      if there is difference between both lists.
-        """
-        # [i for i in list1 + list2 if i not in list1 or i not in list2]
-        diff = [x for x in list2 if x not in list1]
-
-        result = len(diff) == 0
-        if self.debug:
-            if not result:
-                self.module.log(f"There are {len(diff)} differences:")
-                self.module.log(f"  {diff[:5]}")
-
-        return result, diff
-
 
 # ===========================================
 # Module execution.
 
 def main():
-    module = AnsibleModule(
-        argument_spec=dict(
-            data=dict(
-                required=True,
-                type='list'
-            ),
-            volumes=dict(
-                required=True,
-                type='bool'
-            ),
-            mounts=dict(
-                required=True,
-                type='bool'
-            ),
-            debug=dict(
-                required=False,
-                default=False,
-                type='bool'
-            ),
-            owner=dict(
-                required=False
-            ),
-            group=dict(
-                required=False
-            ),
-            mode=dict(
-                required=False,
-                type="str"
-            ),
+    """
+    """
+    args = dict(
+        data=dict(
+            required=True,
+            type='list'
         ),
+        volumes=dict(
+            required=True,
+            type='bool'
+        ),
+        mounts=dict(
+            required=True,
+            type='bool'
+        ),
+        debug=dict(
+            required=False,
+            default=False,
+            type='bool'
+        ),
+        owner=dict(
+            required=False
+        ),
+        group=dict(
+            required=False
+        ),
+        mode=dict(
+            required=False,
+            type="str"
+        ),
+    )
+
+    module = AnsibleModule(
+        argument_spec=args,
         supports_check_mode=True,
     )
 
     p = ContainerMounts(module)
     result = p.run()
 
-    # module.log(msg="= result: {}".format(result))
+    module.log(msg=f"= result: {result}")
     module.exit_json(**result)
 
 
