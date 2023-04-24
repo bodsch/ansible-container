@@ -21,7 +21,7 @@ ansible role for docker deployment of generic container applications
 
 Ansible Collections
 
-- [bodsch.core](https://github.com/bodsch/ansible-collection-core)
+- [bodsch.core](https://github.com/bodsch/ansible-collection-core) in Version > 1.0.14
 
 ```bash
 ansible-galaxy collection install bodsch.core

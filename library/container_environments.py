@@ -193,6 +193,8 @@ class ContainerEnvironments(object):
 
         write_template(data_file, tpl, data)
 
+        checksum = self.checksum.checksum_from_file(data_file)
+
         self.checksum.write_checksum(checksum_file, checksum)
 
 
