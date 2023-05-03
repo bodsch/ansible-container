@@ -153,14 +153,14 @@ class ContainerEnvironments(object):
         checksum_file = os.path.join(self.base_directory, container_name, "container.env.checksum")
         data_file     = os.path.join(self.base_directory, container_name, "container.env")
 
-        changed, new_checksum, old_checksum = self.checksum.validate_from_file(checksum_file, data_file)
+        changed, new_checksum, old_checksum = self.checksum.validate(checksum_file, environments)
 
         if changed:
             self.__write_template("environments", environments, data_file, new_checksum, checksum_file)
 
         return changed
 
-    def _write_properties(self, container_name, property_filename, properties = {}):
+    def _write_properties(self, container_name, property_filename, environments = {}):
         """
         """
         checksum_file = os.path.join(self.base_directory, container_name, f"{property_filename}.checksum")
@@ -176,7 +176,7 @@ class ContainerEnvironments(object):
 
         checksum_file = os.path.join(f"{data_file}.checksum")
 
-        changed, new_checksum, old_checksum = self.checksum.validate_from_file(checksum_file, data_file)
+        changed, new_checksum, old_checksum = self.checksum.validate(checksum_file, environments)
 
         if changed:
             self.__write_template("properties", properties, data_file, new_checksum, checksum_file)
