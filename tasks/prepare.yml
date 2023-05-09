@@ -87,18 +87,27 @@
     - container_python_packages is defined
     - container_python_packages | count > 0
   block:
-    - name: create requirements.txt
-      ansible.builtin.template:
-        src: requirements.txt.j2
-        dest: /tmp/container-requirements.txt
-        mode: 0660
 
-    - name: ensure python dependecies for container are installed
+    - name: create pip requirements file
+      bodsch.core.pip_requirements:
+        name: container
+        requirements: "{{ container_python_packages }}"
+      register: pip_requirements
+
+    - name: fail if pip not installed
+      ansible.builtin.fail:
+        msg: python pip is not installed
+      when:
+        - not pip_requirements.pip.present
+
+    - name: install container python packages  # noqa no-handler
       ansible.builtin.pip:
-        requirements: /tmp/container-requirements.txt
+        executable: pip3
+        requirements: "{{ pip_requirements.requirements_file }}"
         state: present
-        # executable: pip{{ '3' if ansible_python.version.major | int == 3 else '' }}
-      register: pip_install
+      when:
+        - pip_requirements.requirements_file is defined
+        - pip_requirements.changed
 
     - name: do facts module to get latest information
       ansible.builtin.setup:
@@ -177,6 +186,6 @@
     state: directory
     owner: root
     group: root
-    mode: 0777
+    mode: 0775
 
 ...
