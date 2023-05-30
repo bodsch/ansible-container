@@ -26,6 +26,9 @@
       - name: busybox
         hostname: busybox
         image: busybox:latest
+      - name: busybox-2
+        hostname: busybox-2
+        image: busybox:latest
 
   roles:
     - role: ansible-container

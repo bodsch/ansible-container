@@ -112,3 +112,17 @@ def test_property_file(host, get_vars):
     assert property_file.is_file
     assert repl_user_key in property_file.content_string
     assert repl_user_val in property_file.content_string
+
+
+def test_property_changes(host, get_vars):
+    """
+    """
+    import re
+    dir = host.file(get_vars.get('container_env_directory'))
+
+    property_file = host.file(f"{dir.linked_to}/hello-world/hello-world.properties")
+    content = property_file.content_string.split("\n")
+
+    re_recursion_depth = re.compile("publisher.maxRecursionDepth.*= 900")
+
+    assert (len(list(filter(re_recursion_depth.match, content))) > 0)

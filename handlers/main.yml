@@ -21,7 +21,7 @@
     - _container_data is defined
     - _container_data.container_data is defined
 
-- name: created environnments or properties
+- name: created environnments or properties  # noqa no-handler
   ansible.builtin.debug:
     msg: "{{ _container_data.msg }}"
   when:

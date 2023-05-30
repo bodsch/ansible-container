@@ -19,6 +19,7 @@ from ansible_collections.bodsch.core.plugins.module_utils.directory import creat
 class ContainerMounts(object):
     """
     """
+
     def __init__(self, module):
         """
         """

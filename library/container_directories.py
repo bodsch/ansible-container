@@ -18,6 +18,7 @@ from ansible_collections.bodsch.core.plugins.module_utils.lists import compare_t
 class ContainerDirectories(object):
     """
     """
+
     def __init__(self, module):
         """
         """

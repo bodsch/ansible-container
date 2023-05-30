@@ -16,6 +16,7 @@ class FilterModule(object):
     """
       ansible filter
     """
+
     def filters(self):
         return {
             'container_hashes': self.filter_hashes,
@@ -27,6 +28,7 @@ class FilterModule(object):
             'container_mounts': self.filter_mounts,
             'container_ignore_state': self.container_ignore_state,
             'container_filter_by': self.container_filter_by,
+            'container_facts': self.container_facts,
             'remove_values': self.remove_values,
             'remove_custom_fields': self.remove_custom_fields,
             'remove_source_handling': self.remove_source_handling,
@@ -147,7 +149,7 @@ class FilterModule(object):
                 - stopped
                 - started ← (default)
         """
-        # display.v(f"container_state(self, data, {state}, {return_value})")
+        display.v(f"container_state(self, data, {state}, {return_value})")
 
         result = []
         _defaults_present = ['started', 'present']
@@ -354,8 +356,6 @@ class FilterModule(object):
 
         d = data.copy()
 
-        display.v(f"  type {type(d)}")
-
         for entry in d:
             if filter_by == "name":
                 name = entry.get("name")
@@ -376,6 +376,18 @@ class FilterModule(object):
                     data.remove(entry)
 
         return data
+
+    def container_facts(self, data):
+        """
+        """
+        display.v("container_facts(self, data)")
+        display.v(f"  {data}")
+        display.v(f"  type {type(data)}")
+        result = []
+
+        display.v(f"  = result {result}")
+
+        return result
 
     def remove_custom_fields(self, data):
         """

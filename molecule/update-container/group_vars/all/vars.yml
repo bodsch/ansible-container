@@ -1,12 +1,40 @@
 ---
 
+# container_clean_update_fact: false
+
 container_fail:
   error_at_launch: false
 
 container:
-  - name: busybox
-    hostname: busybox
+  - name: busybox-1
+    hostname: busybox-1
     image: busybox:1.35.0
+    property_files:
+      - name: publisher.properties
+        properties:
+          replicator.user: 'replicator'
+          replicator.password: 'replicator'
+          replicator.domain: 'localhost'
+          replicator.tmp_dir: 'var/tmp'
+      - name: database.properties
+    properties:
+      publisher.maxRecursionDepth: 200
+      replicator.tmp_dir: 'var/tmp'
+    environments:
+      VIRTUAL_HOST: busybox-1.local
+      TEST_WORF: true
+      DBA_HOST: database
+      DBA_USER: username
+
+  - name: busybox-2
+    hostname: busybox-2
+    image: busybox:1.36.0
+
+  - name: busybox-3
+    hostname: busybox-3
+    image: busybox:latest
+    state: present
+
 
 container_post_tasks:
   - /usr/local/bin/remove_untagged_images.sh

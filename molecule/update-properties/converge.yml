@@ -35,6 +35,14 @@
           replicator.password: 'replicator'
           # replicator.domain: ''
           replicator.tmp_dir: 'var/tmp'
+        property_files:
+          - name: publisher.properties
+            properties:
+              replicator.user: 'replicator'
+              replicator.password: 'replicator'
+              replicator.domain: 'localhost'
+              replicator.tmp_dir: 'var/tmp'
+          - name: database.properties
 
   roles:
     - role: ansible-container

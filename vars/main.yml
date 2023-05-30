@@ -16,7 +16,7 @@ container_registry_default:
   password: ''
 
 _container_images_information_pulled: {}
-_container_images_state_present: []
+_needed_container_images: []
 
 container_changed: []
 

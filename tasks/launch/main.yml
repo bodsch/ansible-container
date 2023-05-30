@@ -11,3 +11,9 @@
   when: "ansible_version.full is version_compare('2.10', '>=')"
   tags:
     - container_launch
+
+- name: create custom fact file
+  bodsch.core.facts:
+    name: container
+    facts:
+      update_needed: "{{ container }}"

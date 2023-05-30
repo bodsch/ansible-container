@@ -50,10 +50,10 @@
     - container_exec_post_tasks
 
 - name: remove update fact
-  become: true
-  ansible.builtin.file:
-    path: /etc/ansible/facts.d/update_container.fact
+  bodsch.core.facts:
+    name: update_container
     state: absent
+    facts: {}
   when:
     - container_clean_update_fact
 
