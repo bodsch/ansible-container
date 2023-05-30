@@ -1,25 +1,9 @@
 ---
 
-- name: converge
-  hosts: instance
-  any_errors_fatal: false
-  gather_facts: true
-
-  environment:
-    NETRC: ''
-
-  roles:
-    - role: ansible-container
-
-# ----------------------------------------------------------------------------------
-
 - name: update
   hosts: instance
   any_errors_fatal: false
   gather_facts: true
-
-  environment:
-    NETRC: ''
 
   vars:
     container:

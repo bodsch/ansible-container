@@ -42,8 +42,8 @@ provisioner:
       callbacks_enabled: profile_tasks
       gathering: smart
       fact_caching: jsonfile
-      fact_caching_timeout: 8640
-      fact_caching_connection: ansible_facts
+      fact_caching_timeout: 30
+      fact_caching_connection: "${MOLECULE_EPHEMERAL_DIRECTORY}/ansible_facts"
 
 scenario:
   test_sequence:

@@ -1,48 +1,9 @@
 ---
 
-- name: converge
-  hosts: instance
-  any_errors_fatal: false
-  gather_facts: true
-
-  environment:
-    NETRC: ''
-
-  roles:
-    - role: ansible-container
-
-
-# ----------------------------------------------------------------------------------
-
 - name: update
   hosts: instance
-  any_errors_fatal: false
+  any_errors_fatal: true
   gather_facts: true
-
-  environment:
-    NETRC: ''
-
-  vars:
-    container:
-      - name: hello-world
-        hostname: hello-world
-        image: hello-world:latest
-        properties:
-          #
-          publisher.maxRecursionDepth: 900
-          # user and password for login to the staging serve
-          replicator.user: 'replicator'
-          replicator.password: 'replicator'
-          # replicator.domain: ''
-          replicator.tmp_dir: 'var/tmp'
-        property_files:
-          - name: publisher.properties
-            properties:
-              replicator.user: 'replicator'
-              replicator.password: 'replicator'
-              replicator.domain: 'localhost'
-              replicator.tmp_dir: 'var/tmp'
-          - name: database.properties
 
   roles:
     - role: ansible-container

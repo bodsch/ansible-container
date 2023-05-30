@@ -42,3 +42,42 @@
 
   roles:
     - role: docker
+
+- name: deploy container
+  hosts: instance
+  any_errors_fatal: false
+  gather_facts: true
+
+  vars:
+    container:
+      - name: busybox-1
+        hostname: busybox-1
+        image: busybox:1.35.0
+        property_files:
+          - name: publisher.properties
+            properties:
+              replicator.user: 'replicator'
+              replicator.password: 'replicator'
+              replicator.domain: 'localhost'
+              replicator.tmp_dir: 'var/tmp'
+          - name: database.properties
+        properties:
+          publisher.maxRecursionDepth: 200
+          replicator.tmp_dir: 'var/tmp'
+        environments:
+          VIRTUAL_HOST: busybox-1.local
+          TEST_WORF: true
+          DBA_HOST: database
+          DBA_USER: username
+
+      - name: busybox-2
+        hostname: busybox-2
+        image: busybox:1.36.0
+
+      - name: busybox-3
+        hostname: busybox-3
+        image: busybox:latest
+        state: present
+
+  roles:
+    - role: ansible-container

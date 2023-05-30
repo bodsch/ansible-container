@@ -50,11 +50,29 @@
     - container_exec_post_tasks
 
 - name: remove update fact
-  bodsch.core.facts:
-    name: update_container
+  ansible.builtin.file:
     state: absent
-    facts: {}
+    path: /etc/ansible/facts.d/update_container.fact
   when:
     - container_clean_update_fact
 
+#- name: clear facts
+#  meta: clear_facts
+#
+# - name: reset container facts
+#   ansible.builtin.set_fact:
+#     container: []
+#
+# - name: do facts module to get latest information
+#   ansible.builtin.setup:
+#     gather_subset:
+#       - "all"
+#       #- "facter"
+#       #- "local"
+#
+# - name: container facts
+#   debug:
+#     msg:
+#       - "{{ container }}"
+#       - "{{ ansible_local | default({}) }}"
 ...

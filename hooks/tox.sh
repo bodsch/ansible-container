@@ -9,10 +9,13 @@ then
   for collection in $(grep -v "#" collections.yml | grep "^  - name: " | awk -F ': ' '{print $2}')
   do
     collections_installed="$(ansible-galaxy collection list | grep ${collection} 2> /dev/null)"
+    #version=$(yq -r \
+    #  ".collections[] | select(.name == \"${collection}\") | .version" collections.yml)
 
     if [ -z "${collections_installed}" ]
     then
       echo "Install the required collection '${collection}'"
+
       ansible-galaxy collection install ${collection}
     else
       collection_version=$(echo "${collections_installed}" | awk -F ' ' '{print $2}')
