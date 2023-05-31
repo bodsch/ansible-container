@@ -123,6 +123,20 @@ container_registry:
   password: ''
 ```
 
+If you need to obtain containers from more than one registry, you can also configure them accordingly (Only available from version >2.5.0):
+
+```yaml
+container_registry:
+  # Log into DockerHub
+  - username: 'docker'
+    password: 'rekcod'
+  # Log into private registry and force re-authorization
+  - username: 'yourself'
+    password: 'secrets3'
+    host: 'your.private.registry.io'
+    reauthorize: true
+```
+
 ### `container_pre_tasks` and `container_post_tasks`
 
 You can define your own pre- or post-tasks.  

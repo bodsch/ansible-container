@@ -1,6 +1,6 @@
 ---
 
-- name: "pull container from container registry {{ container_registry.host }}"
+- name: "pull container from container registry"
   community.general.docker_image:
     name: "{{ item }}"
     source: pull

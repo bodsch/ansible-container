@@ -11,9 +11,16 @@ container_python_packages:
 container_update_needed: false
 
 container_registry_default:
-  host: ''
-  username: ''
-  password: ''
+  - username: ''
+    password: ''
+    host:
+    reauthorize:
+    debug:
+    tls:
+    ca_cert:
+    client_cert:
+    client_key:
+    validate_certs:
 
 _container_images_information_pulled: {}
 _needed_container_images: []

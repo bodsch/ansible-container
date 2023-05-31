@@ -36,35 +36,36 @@ class FilterModule(object):
             'properties_changed': self.filter_properties_changed,
             'update': self.filter_update,
             'files_available': self.files_available,
-            'reporting': self.reporting
+            'reporting': self.reporting,
+            'combine_registries': self.combine_registries,
         }
 
-    def filter_hashes(self, mydict):
+    def filter_hashes(self, data):
         """
           return basic information about containers
         """
         seen = {}
         data = {}
 
-        if (isinstance(mydict, list)):
-            data = mydict['results']
+        if isinstance(data, list):
+            data = data.get('results', [])
 
         for i in data:
-            if (isinstance(i, dict)):
+            if isinstance(i, dict):
                 cont = {}
                 item = {}
 
-                if ('container' in i):
+                if 'container' in i:
                     cont = i.get('container')
-                if ('item' in i):
+                if 'item' in i:
                     item = i.get('item')
 
-                if (cont):
+                if cont:
                     name = cont.get('Name').strip("/")
                     # display.vv("found: {}".format(name))
                     image         = cont.get('Config').get('Image')
                     created       = cont.get('Created')
-                elif (item):
+                elif item:
                     name = item.get('name')
                     # display.vv("found: {}".format(name))
                     image         = item.get('image')
@@ -93,7 +94,7 @@ class FilterModule(object):
         """
         result = {}
 
-        if (isinstance(left_dict, list)):
+        if isinstance(left_dict, list):
             _dict = {}
 
             for e in left_dict:
@@ -149,7 +150,7 @@ class FilterModule(object):
                 - stopped
                 - started ← (default)
         """
-        display.v(f"container_state(self, data, {state}, {return_value})")
+        # display.v(f"container_state(self, data, {state}, {return_value})")
 
         result = []
         _defaults_present = ['started', 'present']
@@ -170,7 +171,7 @@ class FilterModule(object):
                     if image:
                         result.append(image)
 
-        display.v(f"  = result {result}")
+        # display.v(f"  = result {result}")
 
         return result
 
@@ -183,15 +184,15 @@ class FilterModule(object):
         """
         """
         result = []
-        if (isinstance(data, dict)):
+        if isinstance(data, dict):
             data = data['results']
 
         for i in data:
-            if (isinstance(i, dict)):
+            if isinstance(i, dict):
                 changed = i.get('changed', False)
                 item    = i.get('item', None)
 
-                if (changed):
+                if changed:
                     result.append(item)
 
         return result
@@ -202,11 +203,11 @@ class FilterModule(object):
         result = []
         # display.v("filter_properties_changed({})".format({}))
 
-        if (isinstance(data, dict)):
+        if isinstance(data, dict):
             data = data['results']
 
         for i in data:
-            if (isinstance(i, dict)):
+            if isinstance(i, dict):
                 changed = i.get('changed', False)
                 item    = i.get('item', {}).get('name', None)
 
@@ -333,13 +334,13 @@ class FilterModule(object):
     def container_ignore_state(self, data, ignore_states):
         """
         """
-        display.v(f"container_ignore_state(self, data, {ignore_states})")
+        # display.v(f"container_ignore_state(self, data, {ignore_states})")
 
         _data = data.copy()
 
         result = [i for i in _data if not (i.get('state', 'started') in ignore_states)]
 
-        display.v(f" = result: {result}")
+        # display.v(f" = result: {result}")
 
         return result
 
@@ -349,7 +350,7 @@ class FilterModule(object):
         :param filter_by:
         :return:
         """
-        display.v(f"container_filter_by(self, data, {filter_by}, {filter_values})")
+        # display.v(f"container_filter_by(self, data, {filter_by}, {filter_values})")
 
         if filter_by not in ["name", "hostname", "image"]:
             return data
@@ -360,19 +361,19 @@ class FilterModule(object):
             if filter_by == "name":
                 name = entry.get("name")
                 if name not in filter_values:
-                    display.v(f" = drop: {name}")
+                    # display.v(f" = drop: {name}")
                     data.remove(entry)
 
             elif filter_by == "hostname":
                 hostname = entry.get("hostname")
                 if hostname not in filter_values:
-                    display.v(f" = drop: {hostname}")
+                    # display.v(f" = drop: {hostname}")
                     data.remove(entry)
 
             elif filter_by == "image":
                 image = entry.get("image")
                 if image not in filter_values:
-                    display.v(f" = drop: {image}")
+                    # display.v(f" = drop: {image}")
                     data.remove(entry)
 
         return data
@@ -409,7 +410,7 @@ class FilterModule(object):
         """
         """
         # display.v(f"remove_source_handling({data})")
-        if (isinstance(data, list)):
+        if isinstance(data, list):
             data = self._del_keys_from_dict(data, 'source_handling')
 
         # display.v("return : {}".format(data))
@@ -480,6 +481,35 @@ class FilterModule(object):
                         res[image] = msg
 
                     result.append(res)
+
+        # display.v(f"result: => {result}")
+
+        return result
+
+    def combine_registries(self, defaults, data):
+        """
+        """
+        result = []
+
+        if isinstance(data, dict):
+            """
+                old style for single registry
+            """
+            # merge dictionary with defaults
+            d = {**defaults[0], **data}
+            # remove empty entries
+            d = {i: j for i, j in d.items() if j}
+            result.append(d)
+
+        elif isinstance(data, list):
+            """
+            """
+            for e in data:
+                # merge dictionaries
+                d = {**defaults[0], **e}
+                # remove empty entries
+                d = {i: j for i, j in d.items() if j}
+                result.append(d)
 
         # display.v(f"result: => {result}")
 
