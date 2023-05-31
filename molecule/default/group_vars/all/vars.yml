@@ -1,5 +1,17 @@
 ---
 
+container_registry: []
+  # - username: 'bar1'
+  # - username: 'bodsch'
+  #   password: 'xxxxx'
+  #   description: login into dockerhub
+  # - username: 'foo'
+  #   password: 'bar'
+  #   description: login into my private registry
+  #   host: 'hubby'
+  # - username: 'foo2'
+  #   password: 'bar2'
+
 container_network:
   - name: test
     subnet: 172.3.27.0/24

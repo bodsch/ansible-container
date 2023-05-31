@@ -118,7 +118,8 @@
 
 - name: merge container registry configuration between defaults and custom
   ansible.builtin.set_fact:
-    container_registry: "{{ container_registry_default | combine(container_registry, recursive=True) }}"
+    container_registry: "{{ container_registry_default | combine_registries(container_registry) }}"
+  no_log: true
 
 - name: create base directory to persist docker environnments
   become: true
