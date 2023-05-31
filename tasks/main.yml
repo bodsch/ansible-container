@@ -18,15 +18,15 @@
 - name: login into container registry
   ansible.builtin.include_tasks: login.yml
   loop:
-    "{{ container_registry }}"
+    "{{ container_reg }}"
   loop_control:
     index_var: index
     loop_var: registry
     label: ""
   when:
-    - container_registry is defined
-    - container_registry | bodsch.core.type == "list"
-    - container_registry | count > 0
+    - container_reg is defined
+    - container_reg | bodsch.core.type == "list"
+    - container_reg | count > 0
     - registry.username is defined
     - registry.password is defined
     - registry.username | string | length > 0
