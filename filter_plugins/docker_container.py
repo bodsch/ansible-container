@@ -486,32 +486,35 @@ class FilterModule(object):
 
         return result
 
-    def combine_registries(self, defaults, data):
+    def combine_registries(self, data, defaults):
         """
         """
         result = []
 
-        if isinstance(data, dict):
+        _default = defaults[0].copy()
+        _data = data.copy()
+
+        if isinstance(_data, dict):
             """
                 old style for single registry
             """
             # merge dictionary with defaults
-            d = {**defaults[0], **data}
+            _default.update(_data)
             # remove empty entries
-            d = {i: j for i, j in d.items() if j}
+            d = {i: j for i, j in _default.items() if j}
             result.append(d)
 
-        elif isinstance(data, list):
+        elif isinstance(_data, list):
             """
             """
-            for e in data:
+            for e in _data:
                 # merge dictionaries
-                d = {**defaults[0], **e}
+                _default.update(e)
                 # remove empty entries
-                d = {i: j for i, j in d.items() if j}
+                d = {i: j for i, j in _default.items() if j}
                 result.append(d)
 
-        # display.v(f"result: => {result}")
+        display.v(f"result: => {result}")
 
         return result
 
