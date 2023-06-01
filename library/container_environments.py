@@ -165,22 +165,13 @@ class ContainerEnvironments(object):
     def _write_environments(self, container_name, environments = {}):
         """
         """
-        self.module.log(f"  container_name: {container_name}")
         tmp_directory = os.path.join(self.tmp_directory, container_name)
 
         checksum_file = os.path.join(self.base_directory, container_name, "container.env.checksum")
         data_file     = os.path.join(self.base_directory, container_name, "container.env")
 
-        # if len(environments) == 0:
-        #     """
-        #         no environments
-        #     """
-        #     if os.path.exists(data_file):
-        #         os.remove(data_file)
-        #     if os.path.exists(checksum_file):
-        #         os.remove(checksum_file)
-        #
-        #     return False
+        if os.path.exists(checksum_file):
+            os.remove(checksum_file)
 
         """
             write temporary file and generate checksum
@@ -189,38 +180,32 @@ class ContainerEnvironments(object):
         self.__write_template("environments", environments, tmp_file)
         new_checksum = self.checksum.checksum_from_file(tmp_file)
 
-        self.module.log(f"  tmp_file: {tmp_file}")
-        self.module.log(f"  new_checksum: {new_checksum}")
-
         """
             read checksum from real file
         """
         old_checksum = self.checksum.checksum_from_file(data_file)
 
-        self.module.log(f"  data_file: {data_file}")
-        self.module.log(f"  old_checksum: {old_checksum}")
-
         changed = not (new_checksum == old_checksum)
 
         if changed:
-            self.__write_template("environments", environments, data_file, new_checksum, checksum_file)
+            self.__write_template("environments", environments, data_file)
 
         return changed
 
     def _write_properties(self, container_name, property_filename, properties = {}):
         """
         """
-        self.module.log(f"  container_name: {container_name}")
         tmp_directory = os.path.join(self.tmp_directory, container_name)
 
         checksum_file = os.path.join(self.base_directory, container_name, f"{property_filename}.checksum")
         data_file     = os.path.join(self.base_directory, container_name, property_filename)
 
+        if os.path.exists(checksum_file):
+            os.remove(checksum_file)
+
         if len(properties) == 0:
             if os.path.exists(data_file):
                 os.remove(data_file)
-            if os.path.exists(checksum_file):
-                os.remove(checksum_file)
 
             return False
 
@@ -228,19 +213,12 @@ class ContainerEnvironments(object):
         self.__write_template("properties", properties, tmp_file)
         new_checksum = self.checksum.checksum_from_file(tmp_file)
 
-        self.module.log(f"  tmp_file: {tmp_file}")
-        self.module.log(f"  new_checksum: {new_checksum}")
-
         old_checksum = self.checksum.checksum_from_file(data_file)
-
-        self.module.log(f"  data_file    : {data_file}")
-        self.module.log(f"  checksum_file: {checksum_file}")
-        self.module.log(f"  old_checksum : {old_checksum}")
 
         changed = not (new_checksum == old_checksum)
 
         if changed:
-            self.__write_template("properties", properties, data_file, new_checksum, checksum_file)
+            self.__write_template("properties", properties, data_file)
 
         return changed
 

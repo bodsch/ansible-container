@@ -131,7 +131,6 @@ def test_environments(host, get_vars, files):
 
     for file in [
         f"{dir.linked_to}/{files}/container.env",
-        f"{dir.linked_to}/{files}/container.env.checksum"
     ]:
         f = host.file(file)
         assert f.is_file
@@ -145,7 +144,6 @@ def test_properties(host, get_vars, files):
 
     for file in [
         f"{dir.linked_to}/{files}/{files}.properties",
-        f"{dir.linked_to}/{files}/{files}.properties.checksum"
     ]:
         f = host.file(file)
         assert f.is_file

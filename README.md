@@ -123,7 +123,7 @@ container_registry:
   password: ''
 ```
 
-If you need to obtain containers from more than one registry, you can also configure them accordingly (Only available from version >2.5.0):
+If you need to obtain containers from more than one registry, you can also configure them accordingly (Only available from version >2.5.1):
 
 ```yaml
 container_registry:
