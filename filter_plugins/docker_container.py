@@ -26,6 +26,7 @@ class FilterModule(object):
             'container_state': self.container_state,
             'container_volumes': self.filter_volumes,
             'container_mounts': self.filter_mounts,
+            'container_environnments': self.filter_environnments,
             'container_ignore_state': self.container_ignore_state,
             'container_filter_by': self.container_filter_by,
             'container_facts': self.container_facts,
@@ -38,6 +39,7 @@ class FilterModule(object):
             'files_available': self.files_available,
             'reporting': self.reporting,
             'combine_registries': self.combine_registries,
+            'validate_mountpoints': self.validate_mountpoints,
         }
 
     def filter_hashes(self, data):
@@ -129,7 +131,7 @@ class FilterModule(object):
                 if (left != right):
                     result[k] = l_dict
 
-        # display.v("return : {}".format(result))
+        # display.v(f"= return : {result}")
         return result
 
     def filter_names(self, data):
@@ -141,6 +143,17 @@ class FilterModule(object):
         """
         """
         return self._get_keys_from_dict(data, 'image')
+
+    def filter_environnments(self, data, want_list = ["name", "hostname", "environments", "properties", "property_files"]):
+        """
+        """
+        for i in data:
+            container_keys = list(i.keys())
+            for c in container_keys:
+                if c not in want_list:
+                    i.pop(c, None)
+
+        return data
 
     def container_state(self, data, state, return_value):
         """
@@ -171,8 +184,11 @@ class FilterModule(object):
                     if image:
                         result.append(image)
 
-        # display.v(f"  = result {result}")
+        # deduplicate
+        result = list(set(result))
+        result = sorted(result)
 
+        # display.v(f"  = result {result}")
         return result
 
     def remove_values(self, data, values):
@@ -402,7 +418,7 @@ class FilterModule(object):
         else:
             result = data
 
-        # display.v("return : {}".format(result))
+        # display.v(f"= return : {result}")
 
         return result
 
@@ -514,8 +530,50 @@ class FilterModule(object):
                 d = {i: j for i, j in _default.items() if j}
                 result.append(d)
 
-        display.v(f"result: => {result}")
+        # display.v(f"result: => {result}")
 
+        return result
+
+    def validate_mountpoints(self, data):
+        """
+        """
+        result = []
+
+        valid_mount_types = ['bind', 'tmpfs', 'volume']
+
+        for d in data:
+            name = d.get("name", None)
+            mounts = d.get("mounts", [])
+
+            if len(mounts) > 0:
+                for m in mounts:
+                    error = []
+                    _source = m.get("source", None)
+                    _target = m.get("target", None)
+                    _type = m.get("type", None)
+
+                    if not _source:
+                        error.append("missing source")
+
+                    if not _target:
+                        error.append("missing target")
+
+                    if not _type:
+                        error.append("missing type")
+                    elif (_type not in valid_mount_types):
+                        error.append("wrong type")
+
+                    if len(error) > 0:
+                        _definition = m.copy()
+                        _ = _definition.pop("source_handling", None)
+
+                        res = dict(
+                            container = name,
+                            mount_definition = _definition,
+                            error = ", ".join(error)
+                        )
+                        result.append(res)
+        # display.v(f"  = result {result}")
         return result
 
     def _get_keys_from_dict(self, dictionary, key):

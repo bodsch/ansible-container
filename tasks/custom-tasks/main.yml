@@ -6,13 +6,7 @@
     src: "{{ item }}"
     dest: "/usr/local/bin"
     mode: 0755
-  loop:
-    - prune.sh
-    - list_all_container.sh
-    - list_all_images.sh
-    - remove_stopped_container.sh
-    - remove_untagged_images.sh
-    - parse_container_fact.sh
+  loop: "{{ container_custom_tasks | default([]) }}"
   tags:
     - container_install_pre_or_post_tasks
 

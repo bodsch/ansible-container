@@ -95,28 +95,36 @@
     container_names: "{{ container | container_names }}"
     container_images: "{{ container | container_images }}"
     container_mounts: "{{ container | container_mounts }}"
+    container_environnments: "{{ container | container_environnments }}"
     container_reg: "{{ container_registry | combine_registries(container_registry_default) }}"
   no_log: true
 
 - name: validate container mountpoints
-  ansible.builtin.fail:
-    msg: "your mounts definition is not valid!\n
-          The following parameters are required:\n
-          - source\n
-          - target\n
-          - type\n
-          'type' may only have one of the following values: 'bind','tmpfs' or 'volume'\n
-          read: https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html#parameter-mounts"
   when:
-    - container_mounts is defined
     - container_mounts | count > 0
-    - not item.source is defined or
-      not item.target is defined or
-      not item.type is defined or
-      (item.type is defined and item.type not in ['bind','tmpfs','volume'] )
-  loop: "{{ container_mounts | remove_source_handling }}"
-  loop_control:
-    label: "{{ item.source | default('undefined') }}"
+  block:
+    - name: validate container mountpoints
+      ansible.builtin.set_fact:
+        container_validate_mounts: "{{ container | validate_mountpoints }}"
+      no_log: true
+
+    - name: fail
+      when:
+        - container_validate_mounts | count > 0
+      block:
+        - name: broken mountpoint definitions
+          ansible.builtin.debug:
+            msg: "{{ container_validate_mounts }}"
+
+        - name: fail with broken mountpoint definitions
+          ansible.builtin.fail:
+            msg: "your mounts definition is not valid!\n
+                  The following parameters are required:\n
+                  - source\n
+                  - target\n
+                  - type\n
+                  'type' may only have one of the following values: 'bind','tmpfs' or 'volume'\n
+                  read: https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html#parameter-mounts"
 
 - name: create base directory to persist docker environnments
   become: true
@@ -141,7 +149,7 @@
   become: true
   container_environments:
     base_directory: "{{ container_env_directory }}"
-    container: "{{ container }}"
+    container: "{{ container_environnments }}"
   register: _container_data
   notify:
     - update container for recreate running docker instance

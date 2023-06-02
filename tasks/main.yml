@@ -17,6 +17,7 @@
 
 - name: login into container registry
   ansible.builtin.include_tasks: login.yml
+  no_log: true
   loop:
     "{{ container_reg }}"
   loop_control:

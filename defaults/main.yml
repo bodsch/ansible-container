@@ -9,15 +9,23 @@ container_fail:
 
 container_env_directory: /opt/container
 
-container_registry:
-  host: ''
-  username: ''
-  password: ''
+container_registry: []
+#   - username: ''
+#     password: ''
+#     host: ''
 
 container: []
 
 container_pre_tasks: []
 container_post_tasks: []
+
+container_custom_tasks:
+  - prune.sh
+  - list_all_container.sh
+  - list_all_images.sh
+  - remove_stopped_container.sh
+  - remove_untagged_images.sh
+  - parse_container_fact.sh
 
 container_use_network: true
 container_network: []

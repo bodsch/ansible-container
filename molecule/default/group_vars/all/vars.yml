@@ -3,7 +3,7 @@
 container_registry: []
   # - username: 'bar1'
   # - username: 'bodsch'
-  #   password: 'xxxxx'
+  #   password: 'XXX'
   #   description: login into dockerhub
   # - username: 'foo'
   #   password: 'bar'
