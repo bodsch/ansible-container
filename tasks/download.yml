@@ -34,7 +34,7 @@
   ansible.builtin.debug:
     msg:
       - container restart needed ...
-      - "changed container(s) {{ container_changed }}"
+      - "changed container(s) {{ container_changed | join(', ') }}"
   when:
     - container_update_needed
   tags:

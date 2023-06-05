@@ -13,7 +13,7 @@ import pwd
 from ansible.module_utils.basic import AnsibleModule
 from ruamel.yaml import YAML
 from ansible_collections.bodsch.core.plugins.module_utils.lists import compare_two_lists
-from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory_tree
+from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory_tree, current_state
 
 
 class ContainerMounts(object):
@@ -84,23 +84,22 @@ class ContainerMounts(object):
         create_directory_tree(full_list, current_state)
         final_state = self.__analyse_directories(full_list)
 
-        equal_lists, diff, error_msg = compare_two_lists(list1=current_state, list2=final_state)
+        changed, diff, error_msg = compare_two_lists(list1=current_state, list2=final_state)
 
-        self.module.log(f"  error_msg: {error_msg}")
+        # self.module.log(f"   changed: {changed}, diff: {diff}")
 
         # TODO
         # remove custom fields from 'volumes'
-        if not equal_lists:
+        if changed:
             result['msg'] = "changed or created directories"
             msg = ""
             for i in diff:
                 msg += f"- {i}\n"
             result['created_directories'] = msg
-
-        if len(diff) == 0:
+        else:
             result['msg'] = "nothing to do"
 
-        result['changed'] = not equal_lists
+        result['changed'] = changed
         result['failed'] = False
 
         return result
@@ -263,34 +262,13 @@ class ContainerMounts(object):
 
             res[source] = {}
 
-            if os.path.isdir(source):
-                if self.debug:
-                    self.module.log(f"- {source}")
-                _state = os.stat(source)
-                try:
-                    current_owner = pwd.getpwuid(_state.st_uid).pw_uid
-                except KeyError as e:
-                    if self.debug:
-                        self.module.log(f"  {e}")
-                    pass
+            current_owner, current_group, current_mode = current_state(source)
 
-                try:
-                    current_group = grp.getgrgid(_state.st_gid).gr_gid
-                except KeyError as e:
-                    if self.debug:
-                        self.module.log(f"  {e}")
-                    pass
-
-                try:
-                    current_mode = oct(_state.st_mode)[-3:]
-                except KeyError as e:
-                    if self.debug:
-                        self.module.log(f"  {e}")
-                    pass
-
-            res[source]['owner'] = current_owner
-            res[source]['group'] = current_group
-            res[source]['mode'] = current_mode
+            res[source].update({
+                "owner": current_owner,
+                "group": current_group,
+                "mode": current_mode,
+            })
 
             result.append(res)
 

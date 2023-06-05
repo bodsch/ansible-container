@@ -7,11 +7,18 @@
 
 - name: pre and post tasks
   ansible.builtin.include_tasks: custom-tasks/main.yml
+  when:
+    - container_custom_tasks | default([]) | count > 0
+    - (container_pre_tasks | default([]) | count > 0) or
+      (container_post_tasks | default([]) | count > 0)
   tags:
     - container_install_pre_or_post_tasks
 
 - name: network
   ansible.builtin.include_tasks: network.yml
+  when:
+    - container_network | default([]) | count > 0
+    - container_use_network
   tags:
     - container_network
 
@@ -38,28 +45,30 @@
 
 - name: download new container
   ansible.builtin.include_tasks: download.yml
+  when:
+    - _needed_container_images | default([]) | count > 0
   tags:
     - container_pull
 
 - name: execute pre-tasks
   ansible.builtin.include_tasks: custom-tasks/pre-tasks.yml
   when:
-    - container_pre_tasks is defined
-    - container_pre_tasks | count > 0
+    - container_pre_tasks | default([]) | count > 0
   tags:
     - container_install_pre_or_post_tasks
     - container_exec_pre_tasks
 
 - name: launch container
   ansible.builtin.include_tasks: launch/main.yml
+  when:
+    - _needed_container_images | default([]) | count > 0
   tags:
     - container_launch
 
 - name: execute post-tasks
   ansible.builtin.include_tasks: custom-tasks/post-tasks.yml
   when:
-    - container_post_tasks is defined
-    - container_post_tasks | count > 0
+    - container_post_tasks | default([]) | count > 0
   tags:
     - container_install_pre_or_post_tasks
     - container_exec_post_tasks

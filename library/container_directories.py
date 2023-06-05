@@ -11,7 +11,7 @@ import pwd
 import grp
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
+from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory, current_state
 from ansible_collections.bodsch.core.plugins.module_utils.lists import compare_two_lists
 
 
@@ -49,6 +49,8 @@ class ContainerDirectories(object):
         for directory in self.container:
             d = os.path.join(self.base_directory, directory)
 
+            self.module.log(f" - directory: {d}")
+
             if not os.path.isdir(d):
                 pre = self.__analyse_directory(d)
                 create_directory(
@@ -59,13 +61,15 @@ class ContainerDirectories(object):
                 )
                 post = self.__analyse_directory(d)
 
-                diff = compare_two_lists(pre, post)
+                changed, diff, _ = compare_two_lists(pre, post)
 
-                if not diff:
+                self.module.log(f"   changed: {changed}, diff: {diff}")
+
+                if changed:
                     created_directories.append(d)
-
-                if not changed and not diff:
                     changed = True
+
+                # if not changed and not diff:
 
         return dict(
             changed = changed,
@@ -88,24 +92,13 @@ class ContainerDirectories(object):
 
         res[directory] = {}
 
-        if os.path.isdir(directory):
-            _state = os.stat(directory)
-            try:
-                current_owner  = pwd.getpwuid(_state.st_uid).pw_uid
-            except KeyError:
-                pass
-            try:
-                current_group = grp.getgrgid(_state.st_gid).gr_gid
-            except KeyError:
-                pass
-            try:
-                current_mode  = oct(_state.st_mode)[-3:]
-            except KeyError:
-                pass
+        current_owner, current_group, current_mode = current_state(directory)
 
-        res[directory]['owner'] = current_owner
-        res[directory]['group'] = current_group
-        res[directory]['mode']  = current_mode
+        res[directory].update({
+            "owner": current_owner,
+            "group": current_group,
+            "mode": current_mode,
+        })
 
         result.append(res)
 

@@ -12,6 +12,7 @@ import shutil
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
 from ansible_collections.bodsch.core.plugins.module_utils.checksum import Checksum
+from ansible_collections.bodsch.core.plugins.module_utils.diff import SideBySide
 from ansible_collections.bodsch.core.plugins.module_utils.module_results import results
 from ansible_collections.bodsch.core.plugins.module_utils.template.template import write_template
 
@@ -46,6 +47,7 @@ class ContainerEnvironments(object):
         self.owner = module.params.get("owner")
         self.group = module.params.get("group")
         self.mode = module.params.get("mode")
+        self.diff = module.params.get("diff")
 
         pid = os.getpid()
 
@@ -90,7 +92,7 @@ class ContainerEnvironments(object):
             """
               write environments
             """
-            e_changed = self._write_environments(
+            e_changed, difference = self._write_environments(
                 container_name=name,
                 environments=environments
             )
@@ -113,7 +115,7 @@ class ContainerEnvironments(object):
                     property_filename = prop.get("name", None)
                     properties = prop.get("properties", {})
 
-                    _changed = self._write_properties(
+                    _changed, difference = self._write_properties(
                         container_name=name,
                         property_filename=property_filename,
                         properties=properties
@@ -169,6 +171,7 @@ class ContainerEnvironments(object):
 
         checksum_file = os.path.join(self.base_directory, container_name, "container.env.checksum")
         data_file     = os.path.join(self.base_directory, container_name, "container.env")
+        difference    = ""
 
         if os.path.exists(checksum_file):
             os.remove(checksum_file)
@@ -188,9 +191,12 @@ class ContainerEnvironments(object):
         changed = not (new_checksum == old_checksum)
 
         if changed:
+            if self.diff:
+                difference = self.__create_diff(data_file, tmp_file)
+
             self.__write_template("environments", environments, data_file)
 
-        return changed
+        return changed, difference
 
     def _write_properties(self, container_name, property_filename, properties = {}):
         """
@@ -199,6 +205,7 @@ class ContainerEnvironments(object):
 
         checksum_file = os.path.join(self.base_directory, container_name, f"{property_filename}.checksum")
         data_file     = os.path.join(self.base_directory, container_name, property_filename)
+        difference    = ""
 
         if os.path.exists(checksum_file):
             os.remove(checksum_file)
@@ -218,9 +225,12 @@ class ContainerEnvironments(object):
         changed = not (new_checksum == old_checksum)
 
         if changed:
+            if self.diff:
+                difference = self.__create_diff(data_file, tmp_file)
+
             self.__write_template("properties", properties, data_file)
 
-        return changed
+        return changed, difference
 
     def __write_template(self, env, data, data_file, checksum = None, checksum_file = None):
         """
@@ -235,6 +245,34 @@ class ContainerEnvironments(object):
         if checksum and checksum_file:
             self.checksum.write_checksum(checksum_file, checksum)
 
+    def __create_diff(self, data_file, tmp_file):
+        """
+        """
+        self.module.log(f"  __create_diff({data_file}, {tmp_file})")
+        old_data = ""
+        tmp_data = ""
+
+        if os.path.isfile(data_file):
+            self.module.log(f"  data_file: {data_file}")
+            with open(data_file, "r") as f:
+                old_data = f.readlines()
+                old_data = "\n".join(old_data)
+
+        if os.path.isfile(tmp_file):
+            self.module.log(f"  tmp_file: {tmp_file}")
+            with open(tmp_file, "r") as f:
+                tmp_data = f.readlines()
+                tmp_data = "\n".join(tmp_data)
+
+        self.module.log(f"  old_data: {old_data}")
+        self.module.log(f"  tmp_data: {tmp_data}")
+
+        side_by_side = SideBySide(self.module, old_data, tmp_data)
+        diff_side_by_side = side_by_side.diff(width=140, left_title="  Original", right_title= "  Update")
+
+        self.module.log(f"  diff_side_by_side: {diff_side_by_side}")
+
+        return diff_side_by_side
 
 # ===========================================
 # Module execution.
@@ -261,6 +299,11 @@ def main():
         mode=dict(
             required=False,
             type="str"
+        ),
+        diff=dict(
+            required=False,
+            type="bool",
+            default = False
         ),
     )
 
