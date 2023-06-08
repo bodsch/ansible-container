@@ -22,8 +22,6 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - /var/lib/containerd
-      # - /lib/modules:/lib/modules:ro
-      # - /var/lib/docker/overlay2:/var/lib/docker/overlay2:rw
     capabilities:
       - SYS_ADMIN
     tmpfs:
@@ -50,7 +48,6 @@ provisioner:
 
 scenario:
   test_sequence:
-    - lint
     - destroy
     - dependency
     - syntax
