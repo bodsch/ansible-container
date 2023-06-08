@@ -55,10 +55,18 @@ def test_directory(host, get_vars):
     assert dir.exists
     assert dir.is_directory
 
+@pytest.mark.parametrize("directories", [
+    "/tmp/busybox-2",
+    # mounts
+    "/tmp/busybox-2/testing1",
+    "/tmp/busybox-2/testing2",
+])
+def test_volumes_directories(host, directories):
+    dir = host.file(directories)
+    assert dir.is_directory
 
 @pytest.mark.parametrize("directories", [
     "/tmp/busybox-1",
-    "/tmp/busybox-2",
     # volumes
     "/tmp/busybox-1/nginx",
     "/tmp/busybox-1/testing3",
@@ -68,19 +76,14 @@ def test_directory(host, get_vars):
     "/tmp/busybox-1/testing1",
     "/tmp/busybox-1/testing2",
     "/opt/busybox-1/registry",
-    # mounts
-    "/tmp/busybox-2/testing1",
-    "/tmp/busybox-2/testing2",
 ])
-def test_volumes_directories(host, directories):
+def test_no_volumes_directories(host, directories):
     dir = host.file(directories)
-    assert dir.is_directory
+    assert not dir.is_directory
 
 
 @pytest.mark.parametrize("files", [
-    "busybox-1",
     "busybox-2",
-    "hello-world-1"
 ])
 def test_environments(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))
@@ -93,7 +96,7 @@ def test_environments(host, get_vars, files):
 
 
 @pytest.mark.parametrize("files", [
-    "hello-world-1"
+    "busybox-2"
 ])
 def test_properties(host, get_vars, files):
     dir = host.file(get_vars.get('container_env_directory'))

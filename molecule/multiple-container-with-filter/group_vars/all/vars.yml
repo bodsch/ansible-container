@@ -115,6 +115,8 @@ container_2:
       # TEST_WORF: true
       DBA_HOST: database
       DBA_USER: username
+    properties:
+      publisher.enabled: "true"
 
 container_3:
   - name: hello-world-1
