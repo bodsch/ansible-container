@@ -7,9 +7,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-import grp
-import os
-import pwd
 from ansible.module_utils.basic import AnsibleModule
 from ruamel.yaml import YAML
 from ansible_collections.bodsch.core.plugins.module_utils.lists import compare_two_lists

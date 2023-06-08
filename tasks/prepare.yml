@@ -18,20 +18,6 @@
         - default.yaml
       skip: true
 
-- name: make sure python3-apt is installed (only debian based)
-  ansible.builtin.package:
-    name:
-      - python3-apt
-    state: present
-  register: _installed
-  notify:
-    - clean apt cache
-  when:
-    - ansible_os_family | lower == 'debian'
-
-- name: flush handlers
-  ansible.builtin.meta: flush_handlers
-
 - name: python support
   when:
     - container_python_packages is defined
@@ -83,7 +69,6 @@
     container_mounts: "{{ container | container_mounts }}"
     container_environnments: "{{ container | container_environnments }}"
     container_reg: "{{ container_registry | combine_registries(container_registry_default) }}"
-  no_log: true
 
 - name: validate container mountpoints
   when:

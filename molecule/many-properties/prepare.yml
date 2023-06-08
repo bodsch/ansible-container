@@ -5,18 +5,17 @@
   gather_facts: true
 
   pre_tasks:
-    - name: update package cache
-      package:
-        update_cache: true
-
     - name: arch- / artixlinux
+      when:
+        - ansible_distribution | lower == 'archlinux' or
+          ansible_os_family | lower == 'artix linux'
       block:
         - name: update pacman system
-          command: |
+          ansible.builtin.command: |
             pacman --refresh --sync --sysupgrade --noconfirm
 
         - name: create depends service
-          copy:
+          ansible.builtin.copy:
             mode: 0755
             dest: /etc/init.d/net
             content: |
@@ -25,11 +24,21 @@
           when:
             - ansible_os_family | lower == 'artix linux'
 
+    - name: make sure python3-apt is installed (only debian based)
+      ansible.builtin.package:
+        name:
+          - python3-apt
+        state: present
       when:
-        - ansible_distribution | lower == 'archlinux' or
-          ansible_os_family | lower == 'artix linux'
+        - ansible_os_family | lower == 'debian'
 
-    - debug:
+    - name: update package cache
+      become: true
+      ansible.builtin.package:
+        update_cache: true
+
+    - name: environment
+      ansible.builtin.debug:
         msg:
           - "os family            : {{ ansible_distribution }} ({{ ansible_os_family }})"
           - "distribution version : {{ ansible_distribution_major_version }}"
