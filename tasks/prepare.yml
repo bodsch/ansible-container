@@ -90,7 +90,7 @@
     - name: validate container mountpoints
       ansible.builtin.set_fact:
         container_validate_mounts: "{{ container | validate_mountpoints }}"
-      no_log: true
+      # no_log: true
 
     - name: fail
       when:
