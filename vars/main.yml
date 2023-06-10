@@ -27,4 +27,11 @@ container_images_needed: []
 
 container_changed: []
 
+container_names: []
+container_to_launch: []
+container_mounts: []
+container_volumes: []
+container_environnments: []
+container_images_needed: []
+
 ...
