@@ -14,14 +14,6 @@
   tags:
     - container_install_pre_or_post_tasks
 
-- name: network
-  ansible.builtin.include_tasks: network.yml
-  when:
-    - container_network | default([]) | count > 0
-    - container_use_network
-  tags:
-    - container_network
-
 - name: login into container registry
   ansible.builtin.include_tasks: login.yml
   no_log: true
@@ -46,9 +38,17 @@
 - name: download new container
   ansible.builtin.include_tasks: download.yml
   when:
-    - _needed_container_images | default([]) | count > 0
+    - container_images_needed | default([]) | count > 0
   tags:
     - container_pull
+
+- name: network
+  ansible.builtin.include_tasks: network.yml
+  when:
+    - container_network | default([]) | count > 0
+    - container_use_network
+  tags:
+    - container_network
 
 - name: execute pre-tasks
   ansible.builtin.include_tasks: custom-tasks/pre-tasks.yml
@@ -61,7 +61,7 @@
 - name: launch container
   ansible.builtin.include_tasks: launch/main.yml
   when:
-    - _needed_container_images | default([]) | count > 0
+    - container_to_launch | default([]) | count > 0
   tags:
     - container_launch
 

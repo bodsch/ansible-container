@@ -8,7 +8,9 @@
     force_source: true
   register: _container_images_information_pulled
   ignore_errors: false
-  loop: "{{ _needed_container_images }}"
+  loop: "{{ container_images_needed }}"
+  loop_control:
+    label: "{{ item }}"
   tags:
     - container_pull
 
@@ -34,7 +36,7 @@
   ansible.builtin.debug:
     msg:
       - container restart needed ...
-      - "changed container(s) {{ container_changed | join(', ') }}"
+      - "changed container(s) {{ container_changed | list }}"
   when:
     - container_update_needed
   tags:

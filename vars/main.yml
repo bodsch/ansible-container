@@ -23,7 +23,7 @@ container_registry_default:
     validate_certs:
 
 _container_images_information_pulled: {}
-_needed_container_images: []
+container_images_needed: []
 
 container_changed: []
 

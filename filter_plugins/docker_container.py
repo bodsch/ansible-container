@@ -12,15 +12,17 @@ import itertools
 display = Display()
 
 
-class FilterModule(object):
+class FilterModule():
     """
       ansible filter
     """
 
     def filters(self):
+
         return {
-            'container_hashes': self.filter_hashes,
-            'compare_dict': self.filter_compare_dict,
+            # 'container_hashes': self.filter_hashes,
+            # 'compare_dict': self.filter_compare_dict,
+            'container_filter': self.container_filter,
             'container_names': self.filter_names,
             'container_images': self.filter_images,
             'container_state': self.container_state,
@@ -28,13 +30,14 @@ class FilterModule(object):
             'container_mounts': self.filter_mounts,
             'container_environnments': self.filter_environnments,
             'container_ignore_state': self.container_ignore_state,
+            'container_with_states': self.container_with_states,
             'container_filter_by': self.container_filter_by,
             'container_facts': self.container_facts,
-            'remove_values': self.remove_values,
+            # 'remove_values': self.remove_values,
             'remove_custom_fields': self.remove_custom_fields,
             'remove_source_handling': self.remove_source_handling,
             'changed': self.filter_changed,
-            'properties_changed': self.filter_properties_changed,
+            # 'properties_changed': self.filter_properties_changed,
             'update': self.filter_update,
             'files_available': self.files_available,
             'reporting': self.reporting,
@@ -134,6 +137,40 @@ class FilterModule(object):
         # display.v(f"= return : {result}")
         return result
 
+    def container_filter(self, data, state):
+        """
+        """
+        result = {}
+
+        _data = data.copy()
+
+        container_launch = []
+        container_names = []
+        container_images = []
+        container_mounts = []
+        container_volumes = []
+        container_env = []
+
+        if len(state) > 0:
+            container_launch = self.container_ignore_state(_data, state)
+
+        container_names = self.filter_names(_data)
+        container_images = self.container_state(_data)
+        container_mounts = self.filter_mounts(_data)
+        container_volumes = self.filter_volumes(_data)
+        container_env = self.filter_environnments(_data)
+
+        result = dict(
+            names=container_names,
+            images=container_images,
+            launch=container_launch,
+            mounts=container_mounts,
+            volumes=container_volumes,
+            environnments=container_env,
+        )
+
+        return result
+
     def filter_names(self, data):
         """
         """
@@ -147,15 +184,24 @@ class FilterModule(object):
     def filter_environnments(self, data, want_list = ["name", "hostname", "environments", "properties", "property_files"]):
         """
         """
-        for i in data:
-            container_keys = list(i.keys())
-            for c in container_keys:
-                if c not in want_list:
-                    i.pop(c, None)
+        # display.v(f"filter_environnments(self, data, {want_list})")
+        result = []
+        _data = data.copy()
 
-        return data
+        for i in _data:
+            # display.v(f"  - {i.get('name')}")
+            res = {}
+            for k, v in i.items():
+                if k in want_list:
+                    res[k] = v
 
-    def container_state(self, data, state, return_value):
+            result.append(res)
+
+        # display.v(f" - result: {result}")
+
+        return result
+
+    def container_state(self, data, state='present', return_value='image'):
         """
             state can be
                 - absent
@@ -347,16 +393,30 @@ class FilterModule(object):
 
         return result
 
-    def container_ignore_state(self, data, ignore_states):
+    def container_with_states(self, data, states=["present"], includes_undefined=True):
         """
         """
-        # display.v(f"container_ignore_state(self, data, {ignore_states})")
-
         _data = data.copy()
 
+        result = [i for i in _data if (i.get('state', 'started') in states)]
+        # names = [i.get("name") for i in result]
+        # display.v(f" = result: {names}")
+
+        return result
+
+    def container_ignore_state(self, data, ignore_states=["present"]):
+        """
+        """
+        _data = data.copy()
+
+        ignore = [i for i in _data if (i.get('state', 'started') in ignore_states)]
         result = [i for i in _data if not (i.get('state', 'started') in ignore_states)]
 
-        # display.v(f" = result: {result}")
+        ignore_container = [i.get("name") for i in ignore]
+        launch_container = [i.get("name") for i in result]
+
+        display.v(f" = ignore container: {ignore_container}")
+        display.v(f" = launch container: {launch_container}")
 
         return result
 

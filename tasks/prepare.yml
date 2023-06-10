@@ -62,13 +62,26 @@
     - container_filter.names is defined
     - container_filter.names | count > 0
 
-- name: define some container facts
+- name: define container registry fact
   ansible.builtin.set_fact:
-    container_names: "{{ container | container_names }}"
-    container_images: "{{ container | container_images }}"
-    container_mounts: "{{ container | container_mounts }}"
-    container_environnments: "{{ container | container_environnments }}"
     container_reg: "{{ container_registry | combine_registries(container_registry_default) }}"
+
+- name: organise some information about the containers
+  ansible.builtin.set_fact:
+    container_information: "{{ container | container_filter(['present', 'only_present']) }}"
+  when:
+    - container | default([]) | count > 0
+
+- name: define important facts about containers
+  ansible.builtin.set_fact:
+    container_names: "{{ container_information.names }}"
+    container_to_launch: "{{ container_information.launch }}"
+    container_mounts: "{{ container_information.mounts }}"
+    container_volumes: "{{ container_information.volumes }}"
+    container_environnments: "{{ container_information.environnments }}"
+    container_images_needed: "{{ container_information.images }}"
+  when:
+    - container_information | default({})
 
 - name: validate container mountpoints
   when:
@@ -135,7 +148,8 @@
 - name: create container volumes and mountpoints
   become: true
   when:
-    - container_mounts | default([]) | count > 0
+    - container_mounts | default([]) | count > 0 or
+      container_volumes | default([]) | count > 0
   container_mounts:
     data: "{{ container }}"
     volumes: true
@@ -146,11 +160,5 @@
 
 - name: flush handlers
   ansible.builtin.meta: flush_handlers
-
-- name: define container images that are needed
-  ansible.builtin.set_fact:
-    _needed_container_images: "{{ container | container_state('present', 'image') }}"
-  when:
-    - container | default([]) | count > 0
 
 ...
