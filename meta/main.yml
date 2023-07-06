@@ -11,10 +11,9 @@ galaxy_info:
     - name: ArchLinux
     - name: Debian
       versions:
-        # 10
         - buster
-        # 9
         - bullseye
+        - bookworm
 
   galaxy_tags:
     - container

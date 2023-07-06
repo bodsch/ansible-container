@@ -37,9 +37,9 @@
 
     - name: install container python packages  # noqa no-handler
       ansible.builtin.pip:
-        executable: pip3
-        requirements: "{{ pip_requirements.requirements_file }}"
         state: present
+        requirements: "{{ pip_requirements.requirements_file }}"
+        extra_args: "{{ container_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_python.version) | default(omit) }}"
       when:
         - pip_requirements.requirements_file is defined
         - pip_requirements.changed

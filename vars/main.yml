@@ -1,7 +1,10 @@
 ---
 
+python_virtualenv_path: "${HOME}/.venv"
+
 container_packages: []
 
+container_python_extra_args: []
 container_python_packages:
   - name: ruamel.yaml
     version: 0.17
