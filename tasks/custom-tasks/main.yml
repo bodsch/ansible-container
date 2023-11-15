@@ -21,7 +21,7 @@
       ansible.builtin.stat:
         path: "{{ item }}"
         get_checksum: false
-        get_md5: false
+        get_checksum: false
         get_mime: false
         get_attributes: false
       register: _pre_task_available
@@ -47,7 +47,7 @@
       ansible.builtin.stat:
         path: "{{ item }}"
         get_checksum: false
-        get_md5: false
+        get_checksum: false
         get_mime: false
         get_attributes: false
       register: _post_task_available
